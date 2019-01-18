@@ -1,2 +1,0 @@
-# Hampr
-Senior Project
