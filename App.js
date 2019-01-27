@@ -1,17 +1,39 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { createBottomTabNavigator, createAppContainer } from 'react-navigation';
+import { createBottomTabNavigator, createAppContainer, createStackNavigator } from 'react-navigation';
 import HomeScreen from './components/Home.js'
 import SettingsScreen from './components/Settings.js'
 import AddScreen from './components/Add.js'
 import ClosetScreen from './components/Closet.js'
 import WardrobeScreen from './components/Wardrobe.js'
+import ClothingItemScreen from './components/ClothingItem.js'
+
+const ClothingStack = createStackNavigator(
+  {
+    Clothing: {
+    	screen: ClosetScreen
+    },
+    ClothingItem: {
+    	screen: ClothingItemScreen
+    }
+  },
+  {
+  	initialRouteName: 'Clothing',
+  	headerMode: 'none'
+  }
+);
+
+ClothingStack.navigationOptions = ({ navigation }) => {
+	return {
+  	tabBarVisible: navigation.state.index === 0,
+	};
+};
 
 const TabNav =  createBottomTabNavigator(
   {
     Home: HomeScreen,
-    Closet: ClosetScreen,
+    Closet: ClothingStack,
     Add: AddScreen,
     Wardrobe: WardrobeScreen,
     Settings: SettingsScreen,

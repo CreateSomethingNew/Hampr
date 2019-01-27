@@ -1,13 +1,15 @@
 import React from 'react';
-import { Text, View, SectionList, StyleSheet, Alert } from 'react-native';
+import { Text, View, SectionList, StyleSheet, Alert, StatusBar } from 'react-native';
 
 class ClosetScreen extends React.Component {
 
-	GetSectionListItem=(item)=>{
-      Alert.alert(item)
+	GetSectionListItem=(navigate, item)=>{
+      navigate('ClothingItem');
   }
 
   render() {
+    const { navigate } = this.props.navigation;
+
     return (
       <View style={styles.container}>
         <SectionList
@@ -16,7 +18,7 @@ class ClosetScreen extends React.Component {
             {title: 'Jackets', data: ['Jackson']},
           ]}
           renderItem={({item}) => <Text style={styles.item} 
-          	onPress={this.GetSectionListItem.bind(this, item)}>{item}</Text>}
+          	onPress={this.GetSectionListItem.bind(this, navigate, item)}>{item}</Text>}
           renderSectionHeader={({section}) => <Text style={styles.sectionHeader}>{section.title}</Text>}
           keyExtractor={(item, index) => index}
         />
