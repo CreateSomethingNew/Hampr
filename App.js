@@ -8,6 +8,18 @@ import AddScreen from './components/Add.js'
 import ClosetScreen from './components/Closet.js'
 import WardrobeScreen from './components/Wardrobe.js'
 import ClothingItemScreen from './components/ClothingItem.js'
+import OutfitScreen from './components/Outfit.js'
+
+const WardrobeStack = createStackNavigator(
+    {
+        Wardrobe: WardrobeScreen,
+        Outfit: OutfitScreen
+    },
+    {
+        initialRouteName: 'Wardrobe',
+        headerMode: 'none'
+    }
+);
 
 const ClothingStack = createStackNavigator(
   {
@@ -35,7 +47,7 @@ const TabNav =  createBottomTabNavigator(
     Home: HomeScreen,
     Closet: ClothingStack,
     Add: AddScreen,
-    Wardrobe: WardrobeScreen,
+    Wardrobe: WardrobeStack,
     Settings: SettingsScreen,
   },
   {

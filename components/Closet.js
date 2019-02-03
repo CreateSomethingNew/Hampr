@@ -1,6 +1,6 @@
 import React from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Text, View, SectionList, StyleSheet, Alert, 
+import { Text, View, SectionList, StyleSheet, Alert,
          StatusBar, ActionSheetIOS } from 'react-native';
 
 class ClosetScreen extends React.Component {
@@ -36,7 +36,7 @@ class ClosetScreen extends React.Component {
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.headline}>Your Closet</Text>
-          <Ionicons onPress={this.ShowPicker.bind(this)} name="ios-menu" size={40} 
+          <Ionicons onPress={this.ShowPicker.bind(this)} name="ios-menu" size={40}
             style={{position: 'absolute', right: 5}}>
           </Ionicons>
         </View>
@@ -45,7 +45,7 @@ class ClosetScreen extends React.Component {
             {title: 'Shirts', data: ['Red Shirt', 'Green Shirt', 'Blue Shirt']},
             {title: 'Jackets', data: ['Jean Jacker', 'Swag Jacket']},
           ]}
-          renderItem={({item}) => <Text style={styles.item} 
+          renderItem={({item}) => <Text style={styles.item}
           	onPress={this.GetSectionListItem.bind(this, navigate, item)}>{item}</Text>}
           renderSectionHeader={({section}) => <Text style={styles.sectionHeader}>{section.title}</Text>}
           keyExtractor={(item, index) => index}
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     marginTop: 0,
   },
   header: {
-    height: 40, 
+    height: 40,
     backgroundColor: 'powderblue',
     flexDirection: 'row',
     justifyContent: 'center',
