@@ -1,13 +1,24 @@
 import React from 'react';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Text, View, SectionList, StyleSheet, Alert, 
-         StatusBar, ActionSheetIOS } from 'react-native';
+         StatusBar, ActionSheetIOS, FlatList, Image,
+         TouchableWithoutFeedback } from 'react-native';
+import { Header, Icon } from 'react-native-elements';
 
 class ClosetScreen extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { curFilter: 'Type'}
+    this.state = { curFilter: 'Type', dataSource: {} };
+  }
+
+   componentDidMount() {
+    var that = this;
+    let items = Array.apply(null, Array(60)).map((v, i) => {
+      return { id: i, src: 'http://placehold.it/200x200?text=' + (i + 1) };
+    });
+    that.setState({
+      dataSource: items,
+    });
   }
 
 	GetSectionListItem=(navigate, item)=>{
@@ -29,25 +40,38 @@ class ClosetScreen extends React.Component {
     );
   };
 
+  menuIcon = (
+    <Icon name='menu' color='#fff' onPress={this.ShowPicker.bind(this)} />
+  )
+
+  plusIcon = (
+    <View style={{ flexDirection: 'row' }}>
+      <Icon name='shopping-cart' color='#fff' onPress={this.ShowPicker.bind(this)} />
+    </View>
+  )
+
   render() {
     const { navigate } = this.props.navigation;
 
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.headline}>Your Closet</Text>
-          <Ionicons onPress={this.ShowPicker.bind(this)} name="ios-menu" size={40} 
-            style={{position: 'absolute', right: 5}}>
-          </Ionicons>
-        </View>
-        <SectionList
-          sections={[
-            {title: 'Shirts', data: ['Red Shirt', 'Green Shirt', 'Blue Shirt']},
-            {title: 'Jackets', data: ['Jean Jacker', 'Swag Jacket']},
-          ]}
-          renderItem={({item}) => <Text style={styles.item} 
-          	onPress={this.GetSectionListItem.bind(this, navigate, item)}>{item}</Text>}
-          renderSectionHeader={({section}) => <Text style={styles.sectionHeader}>{section.title}</Text>}
+        <Header
+          leftComponent ={this.plusIcon}
+          centerComponent={{ text: 'Closet', style: { color: '#fff', fontSize: 20 } }}
+          rightComponent={this.menuIcon}
+        />
+        <FlatList
+          data={this.state.dataSource}
+          renderItem={({ item }) => (
+            <View style={{ flex: 1, flexDirection: 'column', margin: 1 }}>
+              <TouchableWithoutFeedback onPress={this.GetSectionListItem.bind(this, navigate, item)}
+                onLongPress={this.GetSectionListItem.bind(this, navigate, item)}>
+                <Image style={styles.imageThumbnail} source={{ uri: item.src }} />
+              </TouchableWithoutFeedback>
+              <Text style={{paddingLeft: 55}}>Hi</Text>
+            </View>
+          )}
+          numColumns={3}
           keyExtractor={(item, index) => index}
         />
       </View>
@@ -60,8 +84,12 @@ const styles = StyleSheet.create({
   container: {
    flex: 1,
    flexDirection: 'column',
-   paddingTop: 22,
    alignItems: 'stretch'
+  },
+  imageThumbnail: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 100,
   },
   sectionHeader: {
     paddingTop: 2,
@@ -76,19 +104,6 @@ const styles = StyleSheet.create({
     padding: 10,
     fontSize: 18,
     height: 44,
-  },
-  headline: {
-    fontWeight: 'bold',
-    fontSize: 24,
-    fontFamily: 'Arial',
-    marginTop: 0,
-  },
-  header: {
-    height: 40, 
-    backgroundColor: 'powderblue',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 })
 
