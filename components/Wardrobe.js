@@ -3,6 +3,11 @@ import { Text, View, Button, TouchableHighlight, StyleSheet, Alert } from 'react
 import { Header, Icon } from 'react-native-elements';
 
 class WardrobeScreen extends React.Component {
+   constructor(props) {
+      super(props);
+      this.state = { selectedDate: new Date() };
+   }
+
    _onPressButton() {
       Alert.alert('You tapped the button!')
    }
@@ -11,25 +16,24 @@ class WardrobeScreen extends React.Component {
       Alert.alert('You long-pressed the button!')
    }
 
-   Title = <Text style={styles.title}>Wardrobe</Text>
-   CalendarButton = <Icon name='ios-calendar' type='ionicon' color='white' underlayColor='transparent'
-      onPress={() => this.props.navigation.navigate('Calendar')} />
-      
    render() {
+
+      Title = <Text style={styles.title}>Wardrobe</Text>
+      CalendarButton = <Icon name='ios-calendar' type='ionicon' color='white' underlayColor='transparent'
+         onPress={() => this.props.navigation.navigate('Calendar')}
+         hitSlop={{left: 30, top: 10, bottom: 10}} />
 
       return (
          <View style={{ flex: 1 }}>
 
          <Header
-            centerComponent={this.Title}
-            rightComponent={this.CalendarButton}/>
+            centerComponent={Title}
+            rightComponent={CalendarButton}/>
          <TouchableHighlight
             onPress={this._onPressButton}
             onLongPress={this._onLongPressButton}>
             <Text>Button</Text>
          </TouchableHighlight>
-      
-         
 
          </View>
       );
