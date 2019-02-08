@@ -1,35 +1,39 @@
 import React from 'react';
-import { Text, View, Button, TouchableHighlight, StyleSheet } from 'react-native';
+import { Text, View, Button, TouchableHighlight, StyleSheet, Alert } from 'react-native';
 import { Header, Icon } from 'react-native-elements';
 
 class WardrobeScreen extends React.Component {
-    _onPressButton() {
-        Alert.alert('You tapped the button!')
-    }
+   _onPressButton() {
+      Alert.alert('You tapped the button!')
+   }
 
-    _onLongPressButton() {
-        Alert.alert('You long-pressed the button!')
-    }
+   _onLongPressButton() {
+      Alert.alert('You long-pressed the button!')
+   }
 
-    CalendarButton = <Icon name='ios-calendar' type='ionicon' color='white' />
-    Title = <Text style={styles.title}>Wardrobe</Text>
+   Title = <Text style={styles.title}>Wardrobe</Text>
+   CalendarButton = <Icon name='ios-calendar' type='ionicon' color='white' underlayColor='transparent'
+      onPress={() => this.props.navigation.navigate('Calendar')} />
+      
+   render() {
 
-  render() {
+      return (
+         <View style={{ flex: 1 }}>
 
-    return (
-      <View style={{ flex: 1, alignItems: 'center' }}>
-
-        <Header
+         <Header
             centerComponent={this.Title}
             rightComponent={this.CalendarButton}/>
-        <TouchableHighlight
+         <TouchableHighlight
             onPress={this._onPressButton}
             onLongPress={this._onLongPressButton}>
             <Text>Button</Text>
-        </TouchableHighlight>
-      </View>
-    );
-  }
+         </TouchableHighlight>
+      
+         
+
+         </View>
+      );
+   }
 }
 
 const styles = StyleSheet.create({
