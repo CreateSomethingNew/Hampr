@@ -3,12 +3,13 @@ import { Text, View, SectionList, StyleSheet,
          ActionSheetIOS, FlatList, Image,
          TouchableWithoutFeedback } from 'react-native';
 import { Header, Icon } from 'react-native-elements';
+import { FlatGrid } from 'react-native-super-grid';
 
 class ClosetScreen extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { curFilter: 'Type', dataSource: {}, refresh: false };
+    this.state = { curFilter: 'Type', dataSource: [], refresh: false };
   }
 
   componentDidMount() {
@@ -19,8 +20,7 @@ class ClosetScreen extends React.Component {
       });
     }
     else {
-      console.log("haha");
-      let items = Array.apply(null, Array(60)).map((v, i) => {
+      let items = Array.apply(null, Array(15)).map((v, i) => {
         return { id: i, src: 'http://placehold.it/200x200?text=' + (i + 1) };
       });
 
@@ -67,6 +67,13 @@ class ClosetScreen extends React.Component {
     });
   }
 
+  EnterClosetScreen = () => {
+    tempSource = this.state.dataSource;
+    this.props.navigation.navigate('Clothing', {
+      outfitState: tempSource,
+    });
+  }
+
   menuIcon = (
     <Icon name='menu' color='#fff' onPress={this.ShowPicker.bind(this)} />
   )
@@ -76,7 +83,7 @@ class ClosetScreen extends React.Component {
   )
 
   backIcon = (
-    <Icon name='arrow-back' color='#fff' onPress={this.ShowPicker.bind(this)} />
+    <Icon name='arrow-back' color='#fff' onPress={this.EnterClosetScreen.bind(this)} />
   )
 
   saveIcon = (
@@ -145,6 +152,21 @@ class ClosetScreen extends React.Component {
     }
   }
 
+  highlightFilter = (items, propState) => {
+    if(propState.routeName === "Outfit") {
+      highlightList = []
+      items.forEach(function(item) {
+        if(item.highlight === true)
+          highlightList.push(item);
+      })
+      console.log(highlightList);
+      return highlightList;
+    }
+    else {
+      return items;
+    }
+  }
+
   render() {
     const { navigate } = this.props.navigation;
     const { state } = this.props.navigation;
@@ -152,22 +174,18 @@ class ClosetScreen extends React.Component {
     return (
       <View style={styles.container}>
         {this.renderHeader(state)}
-        <FlatList
-          data={ this.state.dataSource }
-          extraData = {this.state.refresh}
+        <FlatGrid
+          itemDimension={130}
+          items={ this.highlightFilter(this.state.dataSource, state) }
           renderItem={({ item }) => (
-            this.renderItem(item, navigate, state)
-          )}
-          numColumns={2}
-          keyExtractor={(item, index) => index}
-          horizontal={false}
-          style={{ }}
+              this.renderItem(item, navigate, state)
+            )}
+          spacing={0}
         />
       </View>
     );
   }
 }
-
 
 const styles = StyleSheet.create({
   container: {
