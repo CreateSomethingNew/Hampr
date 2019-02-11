@@ -28,6 +28,9 @@ const ClothingStack = createStackNavigator(
     },
     ClothingItem: {
     	screen: ClothingItemScreen
+    },
+    Outfit: {
+    	screen: ClosetScreen
     }
   },
   {
