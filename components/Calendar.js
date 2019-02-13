@@ -22,7 +22,6 @@ class CalendarScreen extends React.Component {
   }
 
   componentDidMount() {
-    let that = this;
     this.dummyApiCall()
       .then((dates) => {
         let markedDates = {};
@@ -36,34 +35,37 @@ class CalendarScreen extends React.Component {
           }
           markedDates[date] = { dots };
         }
-        that.setState(previousState => ({ markedDates }));
+        this.setState(previousState => ({ markedDates }));
       });
+  }
+
+  handleDayPress(day) {
+    this.props.navigation.navigate('Day', { day });
   }
 
   render() {
 
     Title = <Text style={styles.title}>Calendar</Text>
-    BackButton = <Icon name='ios-arrow-back' type='ionicon' color='white' underlayColor='transparent'
-    onPress={() => this.props.navigation.goBack()}
-    hitSlop={{right: 30, top: 10, bottom: 10}} />
+    BackButton =
+      <Icon name='ios-arrow-back' onPress={() => this.props.navigation.goBack()}
+        underlayColor='transparent' type='ionicon' color='white'
+        hitSlop={{right: 30, top: 10, bottom: 10}} />
 
     return (
-      <View style={{ flex: 1 }}>
+      <View style={styles.container}>
 
-      <Header
-      leftComponent={BackButton}
-      centerComponent={Title}
-      />
+        <Header
+          leftComponent={BackButton}
+          centerComponent={Title} />
 
-      <CalendarList
-      onDayPress={(day) => {console.log('selected day', day)}}
-      onDayLongPress={(day) => {console.log('selected day', day)}}
-      monthFormat={'MMMM yyyy'}
-      onMonthChange={(month) => {console.log('month changed', month)}}
-      firstDay={0}
-      markedDates={this.state.markedDates}
-      markingType={'multi-dot'}
-      />
+        <CalendarList
+          onDayPress={this.handleDayPress.bind(this)}
+          onDayLongPress={(day) => {console.log('selected day', day)}}
+          monthFormat={'MMMM yyyy'}
+          onMonthChange={(month) => {console.log('month changed', month)}}
+          firstDay={0}
+          markedDates={this.state.markedDates}
+          markingType={'multi-dot'} />
 
       </View>
     );
@@ -75,6 +77,10 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 20,
     fontWeight: 'bold'
+  },
+  container: {
+    flex: 1,
+    alignItems: 'center'
   }
 });
 

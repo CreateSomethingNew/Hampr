@@ -2,20 +2,22 @@ import React from 'react';
 import { Text, View } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { createBottomTabNavigator, createAppContainer, createStackNavigator } from 'react-navigation';
-import HomeScreen from './components/Home.js'
-import SettingsScreen from './components/Settings.js'
-import AddScreen from './components/Add.js'
-import ClosetScreen from './components/Closet.js'
-import WardrobeScreen from './components/Wardrobe.js'
-import ClothingItemScreen from './components/ClothingItem.js'
-import OutfitScreen from './components/Outfit.js'
-import CalendarScreen from './components/Calendar.js'
+import HomeScreen from './components/Home.js';
+import SettingsScreen from './components/Settings.js';
+import AddScreen from './components/Add.js';
+import ClosetScreen from './components/Closet.js';
+import WardrobeScreen from './components/Wardrobe.js';
+import ClothingItemScreen from './components/ClothingItem.js';
+import OutfitScreen from './components/Outfit.js';
+import CalendarScreen from './components/Calendar.js';
+import DayScreen from './components/Day.js';
 
 const WardrobeStack = createStackNavigator(
     {
         Wardrobe: WardrobeScreen,
         Outfit: OutfitScreen,
-        Calendar: CalendarScreen
+        Calendar: CalendarScreen,
+        Day: DayScreen
     },
     {
         initialRouteName: 'Wardrobe',
