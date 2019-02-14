@@ -24,7 +24,7 @@ class WardrobeScreen extends React.Component {
          hitSlop={{left: 30, top: 10, bottom: 10}} />
 
       return (
-         <View style={{ flex: 1 }}>
+         <View style={styles.container}>
 
          <Header
             centerComponent={Title}
@@ -42,9 +42,14 @@ class WardrobeScreen extends React.Component {
 
 const styles = StyleSheet.create({
   title: {
-   color: 'white',
-   fontSize: 20,
-   fontWeight: 'bold'
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold'
+  },
+  container: {
+    flex: 1,
+    //justifyContent: 'center',
+    alignItems: 'center'
   }
 })
 

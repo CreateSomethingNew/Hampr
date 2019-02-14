@@ -1,31 +1,51 @@
 import React from 'react';
-import { Text, View, SectionList, StyleSheet, Alert, 
-         StatusBar, ActionSheetIOS, FlatList, Image,
+import { Text, View, SectionList, StyleSheet, 
+         ActionSheetIOS, FlatList, Image,
          TouchableWithoutFeedback } from 'react-native';
 import { Header, Icon } from 'react-native-elements';
+import { FlatGrid } from 'react-native-super-grid';
 
 class ClosetScreen extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { curFilter: 'Type', dataSource: {} };
+    this.state = { curFilter: 'Type', dataSource: [], refresh: false };
   }
 
-   componentDidMount() {
-    var that = this;
-    let items = Array.apply(null, Array(60)).map((v, i) => {
-      return { id: i, src: 'http://placehold.it/200x200?text=' + (i + 1) };
-    });
-    that.setState({
-      dataSource: items,
-    });
+  componentDidMount() {
+    const outfitState = this.props.navigation.getParam('outfitState', null);
+    if(outfitState != null) {
+      this.setState({
+        dataSource: outfitState,
+      });
+    }
+    else {
+      let items = Array.apply(null, Array(15)).map((v, i) => {
+        return { id: i, src: 'http://placehold.it/200x200?text=' + (i + 1) };
+      });
+
+      items.forEach(function (item) {
+          item['highlight'] = false;
+      });
+
+      this.setState({
+        dataSource: items,
+      });
+    }
   }
 
-	GetSectionListItem=(navigate, item)=>{
+	GetSectionListItem = (navigate, item) => {
       navigate('ClothingItem');
   };
 
-  ShowPicker=()=>{
+  switchHighLight = (item) => {
+    item.highlight = !item.highlight
+    this.setState({ 
+      refresh: !this.state.refresh
+    })
+  }
+
+  ShowPicker = () => {
     const options = ['Cancel', 'Type', 'Color', 'Brand'];
     ActionSheetIOS.showActionSheetWithOptions(
       {
@@ -40,45 +60,132 @@ class ClosetScreen extends React.Component {
     );
   };
 
+  EnterOutfitScreen = () => {
+    tempSource = this.state.dataSource;
+    this.props.navigation.navigate('Outfit', {
+      outfitState: tempSource,
+    });
+  }
+
+  EnterClosetScreen = () => {
+    tempSource = this.state.dataSource;
+    this.props.navigation.navigate('Clothing', {
+      outfitState: tempSource,
+    });
+  }
+
   menuIcon = (
     <Icon name='menu' color='#fff' onPress={this.ShowPicker.bind(this)} />
   )
 
-  plusIcon = (
-    <View style={{ flexDirection: 'row' }}>
-      <Icon name='shopping-cart' color='#fff' onPress={this.ShowPicker.bind(this)} />
-    </View>
+  cartIcon = (
+    <Icon name='shopping-cart' color='#fff' onPress={this.EnterOutfitScreen.bind(this)} />
   )
 
-  render() {
-    const { navigate } = this.props.navigation;
+  backIcon = (
+    <Icon name='arrow-back' color='#fff' onPress={this.EnterClosetScreen.bind(this)} />
+  )
 
-    return (
-      <View style={styles.container}>
+  saveIcon = (
+    <Icon name='check' color='#fff' onPress={this.ShowPicker.bind(this)} />
+  )
+
+  renderHeader(state) {
+    if(state.routeName === "Clothing") {
+      return (
         <Header
-          leftComponent ={this.plusIcon}
+          leftComponent={this.cartIcon}
           centerComponent={{ text: 'Closet', style: { color: '#fff', fontSize: 20 } }}
           rightComponent={this.menuIcon}
         />
-        <FlatList
-          data={this.state.dataSource}
+      );
+    }
+    else {
+      return (
+        <Header
+          leftComponent={this.backIcon}
+          centerComponent={{ text: 'Outfit', style: { color: '#fff', fontSize: 20 } }}
+          rightComponent={this.saveIcon}
+        />
+      );
+    }
+  }
+
+  renderItem = (item, navigate, state) => {
+    if(state.routeName === "Outfit" && item.highlight === true) {
+      return (
+        <View style={{ flex: 1, flexDirection: 'column', backgroundColor: '#fff0b3', 
+                       borderColor: '#ffff00', borderWidth: 5, margin: 3, marginColor: '#fff' }}>
+          <TouchableWithoutFeedback onLongPress={this.switchHighLight.bind(this, item)}>
+            <Image style={styles.imageThumbnail} source={{ uri: item.src }}/>
+          </TouchableWithoutFeedback>
+          <Text style={styles.text}>Synchilla</Text>
+        </View>
+      );
+    } 
+    else if(state.routeName === "Outfit" && item.highlight === false) {
+      return null;
+    }
+    else if(item.highlight === false ) {
+      return (
+        <View style={{ flex: 1, flexDirection: 'column', backgroundColor: '#fff0b3', 
+                       borderColor: '#fff', borderWidth: 5, margin: 3, marginColor: '#fff' }}>
+          <TouchableWithoutFeedback onPress={this.GetSectionListItem.bind(this, navigate, item)}
+            onLongPress={this.switchHighLight.bind(this, item)}>
+            <Image style={styles.imageThumbnail} source={{ uri: item.src }}/>
+          </TouchableWithoutFeedback>
+          <Text style={styles.text}>Synchilla</Text>
+        </View>
+      );
+    }
+    else {
+      return (
+        <View style={{ flex: 1, flexDirection: 'column', backgroundColor: '#fff0b3', 
+                       borderColor: '#ffff00', borderWidth: 5, margin: 3, marginColor: '#fff' }}>
+          <TouchableWithoutFeedback onPress={this.GetSectionListItem.bind(this, navigate, item)}
+            onLongPress={this.switchHighLight.bind(this, item)}>
+            <Image style={styles.imageThumbnail} source={{ uri: item.src }}/>
+          </TouchableWithoutFeedback>
+          <Text style={styles.text}>Synchilla</Text>
+        </View>
+      );
+    }
+  }
+
+  highlightFilter = (items, propState) => {
+    if(propState.routeName === "Outfit") {
+      highlightList = []
+      items.forEach(function(item) {
+        if(item.highlight === true)
+          highlightList.push(item);
+      })
+      console.log(highlightList);
+      return highlightList;
+    }
+    else {
+      return items;
+    }
+  }
+
+  render() {
+    const { navigate } = this.props.navigation;
+    const { state } = this.props.navigation;
+
+    return (
+      <View style={styles.container}>
+        {this.renderHeader(state)}
+        <FlatGrid
+          itemDimension={130}
+          items={ this.highlightFilter(this.state.dataSource, state) }
           renderItem={({ item }) => (
-            <View style={{ flex: 1, flexDirection: 'column', margin: 1 }}>
-              <TouchableWithoutFeedback onPress={this.GetSectionListItem.bind(this, navigate, item)}
-                onLongPress={this.GetSectionListItem.bind(this, navigate, item)}>
-                <Image style={styles.imageThumbnail} source={{ uri: item.src }} />
-              </TouchableWithoutFeedback>
-              <Text style={{paddingLeft: 55}}>Hi</Text>
-            </View>
-          )}
-          numColumns={3}
-          keyExtractor={(item, index) => index}
+              this.renderItem(item, navigate, state)
+            )}
+          spacing={0}
         />
       </View>
     );
   }
 }
-
 
 const styles = StyleSheet.create({
   container: {
@@ -86,24 +193,16 @@ const styles = StyleSheet.create({
    flexDirection: 'column',
    alignItems: 'stretch'
   },
-  imageThumbnail: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: 100,
-  },
-  sectionHeader: {
-    paddingTop: 2,
-    paddingLeft: 10,
-    paddingRight: 10,
-    paddingBottom: 2,
-    fontSize: 14,
+  text: {
+    textAlign: 'center', 
+    fontSize: 18, 
     fontWeight: 'bold',
-    backgroundColor: 'rgba(247,247,247,1.0)',
+    fontFamily: "Optima",
   },
-  item: {
-    padding: 10,
-    fontSize: 18,
-    height: 44,
+  imageThumbnail: {
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    height: 175,
   },
 })
 
