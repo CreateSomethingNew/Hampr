@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, FlatList, Form, List, Picker, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Button, FlatList, Form, Picker, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ListItem, Icon } from 'react-native-elements';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -25,13 +25,16 @@ class SelectOrEnter extends React.Component {
     };
   }
 
-  addSelection(text) {
-    if (text === "") {
+  addSelection = (event) => {
+    var text = event.nativeEvent.text
+    if (text === "" || this.state.selections.includes(text)) {
       return;
     }
     var selections = this.state.selections.slice();
-    selections.push(text);
-    this.setState({selections: selections});
+    selections.push({text: text});
+    this.setState({
+      selections: selections,
+    });
   }
 
   render() {
@@ -43,16 +46,13 @@ class SelectOrEnter extends React.Component {
           style={styles.textInput}
           onSubmitEditing={(text) => this.addSelection(text)}
         />
-        <List>
-          <FlatList
-            data={this.state.selections}
-            renderItem={({selection}) => (
-              <ListItem
-                title={selection}
-              />
-            )}
-          />
-        </List>
+        <FlatList
+          data={this.state.selections}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({item}) => (
+            <Text>{item.text}</Text>
+          )}
+        />
       </View>
     );
   }
