@@ -27,13 +27,30 @@ class SelectOrEnter extends React.Component {
 
   addSelection = (event) => {
     var text = event.nativeEvent.text
-    if (text === "" || this.state.selections.includes(text)) {
+    if (text === "") {
       return;
     }
-    var selections = this.state.selections.slice();
+    var selections = this.state.selections;
+    for (var i in selections) {
+      if (selections[i].text === text) {
+        return;
+      }
+    }
+    selections = selections.slice();
     selections.push({text: text});
     this.setState({
       selections: selections,
+    });
+  }
+
+  removeSelection = (text) => {
+    var selections = this.state.selections.slice();
+    var i = selections.map(function(e) {
+      return e.text;
+    }).indexOf(text);
+    selections.splice(i, 1);
+    this.setState({
+      selections: selections
     });
   }
 
@@ -50,7 +67,17 @@ class SelectOrEnter extends React.Component {
           data={this.state.selections}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({item}) => (
-            <Text>{item.text}</Text>
+            <ListItem
+              title={item.text}
+              rightIcon={
+                <Icon
+                  name="remove-circle"
+                  onPress={(event) => {
+                    this.removeSelection(item.text);
+                  }}
+                />
+              }
+            />
           )}
         />
       </View>
