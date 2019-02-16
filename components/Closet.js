@@ -4,12 +4,14 @@ import { Text, View, SectionList, StyleSheet,
          TouchableWithoutFeedback, ScrollView } from 'react-native';
 import { Header, Icon } from 'react-native-elements';
 import { FlatGrid } from 'react-native-super-grid';
+import Menu, { MenuProvider, MenuOptions, 
+         MenuOption, MenuTrigger } from 'react-native-popup-menu';
 
 class ClosetScreen extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { curType: 'All', dataSource: [], refresh: false };
+    this.state = { curTags: [], curType: 'All', dataSource: [], refresh: false };
   }
 
   componentDidMount() {
@@ -26,13 +28,24 @@ class ClosetScreen extends React.Component {
 
       i = 0
       items.forEach(function (item) {
+        item['type'] = [];
+        item['tags'] = [];
           item['highlight'] = false;
-          if(i % 5 === 0)
-            item['type'] = "Shirt";
-          else if(i % 3 === 0)
-            item['type'] = "Pants";
-          else
-            item['type'] = "Poop";
+          if(i % 5 === 0) {
+            item['name'] = "Green Shirt";
+            item['type'].push("Shirt");
+            item['tags'].push("Green");
+            item['tags'].push("Striped");
+          }
+          else if(i % 3 === 0) {
+            item['name'] = "Red Pants";
+            item['type'].push("Pants");
+            item['tags'].push("Red");
+          }
+          else {
+            item['name'] = "Poop";
+            item['type'].push("Poop");
+          }
           i++;
       });
 
@@ -53,21 +66,6 @@ class ClosetScreen extends React.Component {
     })
   }
 
-  ShowPicker = () => {
-    const options = ['Cancel', 'Type', 'Color', 'Brand'];
-    ActionSheetIOS.showActionSheetWithOptions(
-      {
-        options: options,
-        cancelButtonIndex: 0,
-      },
-      (buttonIndex) => {
-        if(buttonIndex != 0) {
-          this.setState({curFilter: options[buttonIndex]})
-        }
-      },
-    );
-  };
-
   EnterOutfitScreen = () => {
     tempSource = this.state.dataSource;
     this.props.navigation.navigate('Outfit', {
@@ -82,10 +80,98 @@ class ClosetScreen extends React.Component {
     });
   }
 
-  menuIcon = (
-    <Icon name='menu' color='#fff' 
-          onPress={this.ShowPicker.bind(this)} underlayColor='transparent' />
-  )
+  RemoveTag = (tag, globalState) => {
+    let newTags = globalState.curTags;
+    newTags = newTags.filter(v => v !== tag);
+    this.setState({
+      curTags: newTags,
+      refresh: !globalState.refresh
+    })
+  }
+
+  MakeLine = () => {
+      return (
+        <View style={{ borderBottomColor: 'black', borderBottomWidth: 1 }} />
+      );
+  }
+
+  AddTag = (tag, globalState) => {
+    let newTags = globalState.curTags;
+    newTags.push(tag);
+    this.setState({
+      curTags: newTags,
+      refresh: !globalState.refresh
+    })
+  }
+
+  InactiveTags = (globalState) => {
+    tagFreq = {};
+    sortList = [];
+    inactiveTagComponentList = [];
+    globalState.dataSource.forEach(function(item) {
+      item.tags.forEach(function(curTag) {
+        if(!(globalState.curTags.includes(curTag))) {
+          if(!(curTag in tagFreq))
+            tagFreq[curTag] = 1;
+          else
+            tagFreq[curTag]++;
+        }
+      });
+    });
+    for (let itemTag in tagFreq)
+      sortList.push([itemTag, tagFreq[itemTag]]);
+
+    sortList.sort(function(a, b) {
+      return b[1] - a[1];
+    });
+
+    for (let i = 0; i < sortList.length; i++) {
+      inactiveTagComponentList.push(<MenuOption
+        onSelect={() => this.AddTag(sortList[i][0], globalState)} children=
+      <View>
+        <Text>{sortList[i][0]}</Text>
+        <Icon name='plus' type='entypo' color='#000000' underlayColor='transparent' 
+              containerStyle={{ position: 'absolute', top: 0, right: 10 }} size={20} />
+      </View> />);
+    }
+    return inactiveTagComponentList;
+  }
+
+  ActiveTags = (globalState) => {
+    tagComponentList = [];
+    let something = this;
+    globalState.curTags.forEach(function(name) {
+      tagComponentList.push(<MenuOption onSelect={() => something.RemoveTag(name, globalState)}
+       children=
+      <View>
+        <Text>{name}</Text>
+        <Icon name='cross' type='entypo' color='#000000' underlayColor='transparent' 
+              containerStyle={{ position: 'absolute', top: 0, right: 10 }} size={20} />
+      </View> />);
+    });
+    return tagComponentList;
+  }
+
+  menuIcon = (globalState) => { 
+    const active = this.ActiveTags(globalState);
+    const inactive = this.InactiveTags(globalState);
+
+    return (
+      <Menu>
+        <MenuTrigger customStyles={{ triggerTouchable: { underlayColor: 'transparent'} }} 
+                     children=<Icon name='menu' color='#fff' /> />
+        <MenuOptions>
+          <ScrollView style={{ maxHeight: 200 }}>
+            { active }
+          </ScrollView>
+          { active.length > 0 && inactive.length > 0 ? this.MakeLine() : null }
+          <ScrollView style={{ maxHeight: 200 }}>
+            { inactive }
+          </ScrollView>
+        </MenuOptions>
+      </Menu>
+    );
+  } 
 
   cartIcon = (
     <Icon name='shopping-cart' color='#fff' 
@@ -99,16 +185,16 @@ class ClosetScreen extends React.Component {
 
   saveIcon = (
     <Icon name='check' color='#fff' 
-          onPress={this.ShowPicker.bind(this)} underlayColor='transparent' />
+          underlayColor='transparent' />
   )
 
-  renderHeader(state) {
+  renderHeader(state, globalState) {
     if(state.routeName === "Clothing") {
       return (
         <Header
           leftComponent={this.cartIcon}
           centerComponent={{ text: 'Closet', style: { color: '#fff', fontSize: 20 } }}
-          rightComponent={this.menuIcon}
+          rightComponent={ this.menuIcon(globalState) }
         />
       );
     }
@@ -131,7 +217,7 @@ class ClosetScreen extends React.Component {
           <TouchableWithoutFeedback onLongPress={this.switchHighLight.bind(this, item)}>
             <Image style={styles.imageThumbnail} source={{ uri: item.src }}/>
           </TouchableWithoutFeedback>
-          <Text style={styles.text}>Synchilla</Text>
+          <Text style={styles.text}>{item.name}</Text>
         </View>
       );
     } 
@@ -143,13 +229,13 @@ class ClosetScreen extends React.Component {
             onLongPress={this.switchHighLight.bind(this, item)}>
             <Image style={styles.imageThumbnail} source={{ uri: item.src }}/>
           </TouchableWithoutFeedback>
-          <Text style={styles.text}>Synchilla</Text>
+          <Text style={styles.text}>{item.name}</Text>
         </View>
       );
     }
   }
 
-  highlightFilter = (items, propState, type) => {
+  highlightFilter = (items, propState, type, curTags) => {
     if(propState.routeName === "Outfit") {
       highlightList = [];
       items.forEach(function(item) {
@@ -159,12 +245,19 @@ class ClosetScreen extends React.Component {
       return highlightList;
     }
     else {
-      if(type === "All")
-        return items;
       filterList = [];
       items.forEach(function(item) {
-        if(item.type === type)
-          filterList.push(item);
+        if(item.type.includes(type) || type == "All") {
+          viewFlag = true;
+          for(var i = 0; i < curTags.length; i++) {
+            if(!(item.tags.includes(curTags[i]))) {
+              viewFlag = false;
+              break;
+            }
+          }
+          if(viewFlag)
+            filterList.push(item);
+        }
       })
       return filterList;
     }
@@ -184,12 +277,14 @@ class ClosetScreen extends React.Component {
     let sortList = [];
     buttons.push(<Text style={{ fontSize: 24, marginLeft: 20, marginRight: 20, paddingTop: 4 }}
                   onPress={this.ChangeFilter.bind(this, "All")}>
-      All</Text>);
+                 All</Text>);
     this.state.dataSource.forEach(function(item) {
-      if(!(item.type in typeFreq))
-        typeFreq[item.type] = 1;
-      else
-        typeFreq[item.type]++;
+      item.type.forEach(function(curType) {
+        if(!(curType in typeFreq))
+          typeFreq[curType] = 1;
+        else
+          typeFreq[curType]++;
+      })
     })
     for (let itemType in typeFreq)
       sortList.push([itemType, typeFreq[itemType]]);
@@ -216,18 +311,21 @@ class ClosetScreen extends React.Component {
                       </View>;
 
     return (
-      <View style={styles.container}>
-        { this.renderHeader(state) }
-        { state.routeName === "Clothing" ? typeFilter : null }
-        <FlatGrid
-          itemDimension={130}
-          items={ this.highlightFilter(this.state.dataSource, state, this.state.curType) }
-          renderItem={({ item }) => (
-              this.renderItem(item, navigate, state)
-            )}
-          spacing={0}
-        />
-      </View>
+      <MenuProvider>
+        <View style={styles.container}>
+          { this.renderHeader(state, this.state) }
+          { state.routeName === "Clothing" ? typeFilter : null }
+          <FlatGrid
+            itemDimension={130}
+            items={ this.highlightFilter(this.state.dataSource, state, this.state.curType, 
+              this.state.curTags) }
+            renderItem={({ item }) => (
+                this.renderItem(item, navigate, state)
+              )}
+            spacing={0}
+          />
+        </View>
+      </MenuProvider>
     );
   }
 }
