@@ -11,7 +11,7 @@ class ClosetScreen extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { curTags: [], curType: 'All', dataSource: [], refresh: false };
+    this.state = { curTags: [], curType: 'All', dataSource: [], refresh: false, select: false };
   }
 
   componentDidMount() {
@@ -62,6 +62,23 @@ class ClosetScreen extends React.Component {
   switchHighLight = (item) => {
     item.highlight = !item.highlight
     this.setState({ 
+      refresh: !this.state.refresh
+    })
+  }
+
+  enterSelect = () => {
+    this.setState({
+      select: true,
+      refresh: !this.state.refresh
+    })
+  }
+
+  exitSelect = () => {
+    this.state.dataSource.forEach(function(item) {
+      item.highlight = false;
+    })
+    this.setState({
+      select: false,
       refresh: !this.state.refresh
     })
   }
@@ -173,11 +190,6 @@ class ClosetScreen extends React.Component {
     );
   } 
 
-  cartIcon = (
-    <Icon name='shopping-cart' color='#fff' 
-          onPress={this.EnterOutfitScreen.bind(this)} underlayColor='transparent' />
-  )
-
   backIcon = (
     <Icon name='arrow-back' color='#fff' 
           onPress={this.EnterClosetScreen.bind(this)} underlayColor='transparent' />
@@ -188,15 +200,38 @@ class ClosetScreen extends React.Component {
           underlayColor='transparent' />
   )
 
+  selectText = (
+    <Text onPress={this.enterSelect.bind(this)} style={{ color: '#fff', fontSize: 20  }}>
+      Select
+    </Text>
+  )
+
+  cancelText = (
+    <Text onPress={this.exitSelect.bind(this)} style={{ color: '#fff', fontSize: 20  }}>
+      Clear
+    </Text>
+  )
+
   renderHeader(state, globalState) {
     if(state.routeName === "Clothing") {
-      return (
-        <Header
-          leftComponent={this.cartIcon}
-          centerComponent={{ text: 'Closet', style: { color: '#fff', fontSize: 20 } }}
-          rightComponent={ this.menuIcon(globalState) }
-        />
-      );
+      if(globalState.select) {
+        return (
+          <Header
+            leftComponent={ this.cancelText }
+            centerComponent={{ text: 'Closet', style: { color: '#fff', fontSize: 20 } }}
+            rightComponent={ this.menuIcon(globalState) }
+          />
+        );
+      }
+      else {
+        return (
+          <Header
+            leftComponent={ this.selectText }
+            centerComponent={{ text: 'Closet', style: { color: '#fff', fontSize: 20 } }}
+            rightComponent={ this.menuIcon(globalState) }
+          />
+        );
+      }
     }
     else {
       return (
@@ -210,28 +245,54 @@ class ClosetScreen extends React.Component {
   }
 
   renderItem = (item, navigate, state) => {
-    if(item.highlight === true) {
+    if(state.routeName === "Outfit") {
       return (
         <View style={{ flex: 1, flexDirection: 'column', backgroundColor: '#fff0b3', 
                        borderColor: '#ffff00', borderWidth: 5, margin: 3 }}>
-          <TouchableWithoutFeedback onLongPress={this.switchHighLight.bind(this, item)}>
+          <TouchableWithoutFeedback onPress={this.switchHighLight.bind(this, item)}>
             <Image style={styles.imageThumbnail} source={{ uri: item.src }}/>
           </TouchableWithoutFeedback>
           <Text style={styles.text}>{item.name}</Text>
         </View>
       );
-    } 
-    else if(item.highlight === false ) {
-      return (
-        <View style={{ flex: 1, flexDirection: 'column', backgroundColor: '#fff0b3', 
-                       borderColor: '#fff', borderWidth: 5, margin: 3 }}>
-          <TouchableWithoutFeedback onPress={this.GetSectionListItem.bind(this, navigate, item)}
-            onLongPress={this.switchHighLight.bind(this, item)}>
-            <Image style={styles.imageThumbnail} source={{ uri: item.src }}/>
-          </TouchableWithoutFeedback>
-          <Text style={styles.text}>{item.name}</Text>
-        </View>
-      );
+    }
+    else {
+      if(this.state.select === false) {
+        return (
+          <View style={{ flex: 1, flexDirection: 'column', backgroundColor: '#fff0b3', 
+                         borderColor: '#fff', borderWidth: 5, margin: 3 }}>
+            <TouchableWithoutFeedback onPress={this.GetSectionListItem.bind(this, navigate, item)}
+              onLongPress={this.enterSelect.bind(this)}>
+              <Image style={styles.imageThumbnail} source={{ uri: item.src }}/>
+            </TouchableWithoutFeedback>
+            <Text style={styles.text}>{item.name}</Text>
+          </View>
+        );
+      }
+      else {
+        if(item.highlight === true) {
+          return (
+            <View style={{ flex: 1, flexDirection: 'column', backgroundColor: '#fff0b3', 
+                           borderColor: '#ffff00', borderWidth: 5, margin: 3 }}>
+              <TouchableWithoutFeedback onPress={this.switchHighLight.bind(this, item)}>
+                <Image style={styles.imageThumbnail} source={{ uri: item.src }}/>
+              </TouchableWithoutFeedback>
+              <Text style={styles.text}>{item.name}</Text>
+            </View>
+          );
+        } 
+        else if(item.highlight === false ) {
+          return (
+            <View style={{ flex: 1, flexDirection: 'column', backgroundColor: '#fff0b3', 
+                           borderColor: '#fff', borderWidth: 5, margin: 3 }}>
+              <TouchableWithoutFeedback onPress={this.switchHighLight.bind(this, item)}>
+                <Image style={styles.imageThumbnail} source={{ uri: item.src }}/>
+              </TouchableWithoutFeedback>
+              <Text style={styles.text}>{item.name}</Text>
+            </View>
+          );
+        }
+      }
     }
   }
 
@@ -300,6 +361,15 @@ class ClosetScreen extends React.Component {
     return buttons;
   }
 
+  getNumHighlight = (dataSource) => {
+    let num = 0;
+    dataSource.forEach(function(item) {
+      if(item.highlight)
+        num += 1;
+    })
+    return num;
+  }
+
   render() {
     const { navigate } = this.props.navigation;
     const { state } = this.props.navigation;
@@ -309,6 +379,13 @@ class ClosetScreen extends React.Component {
                       { this.createScrollButtons() }
                       </ScrollView>
                       </View>;
+    const numItemsHighlight = this.getNumHighlight(this.state.dataSource);
+    const addToCart = <TouchableWithoutFeedback onPress={this.EnterOutfitScreen.bind(this)}>
+                        <View style={{ height: 50, backgroundColor: 'green', 
+                                     justifyContent: 'center', alignItems: 'center' }}>
+                        <Text >Add {numItemsHighlight} to cart</Text>
+                        </View>
+                      </TouchableWithoutFeedback>;
 
     return (
       <MenuProvider>
@@ -325,6 +402,7 @@ class ClosetScreen extends React.Component {
             spacing={0}
           />
         </View>
+        { this.state.select ? addToCart : null }
       </MenuProvider>
     );
   }
