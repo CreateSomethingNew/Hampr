@@ -11,6 +11,7 @@ import ClothingItemScreen from './components/ClothingItem.js';
 import OutfitScreen from './components/Outfit.js';
 import CalendarScreen from './components/Calendar.js';
 import DayScreen from './components/Day.js';
+import { MenuProvider } from 'react-native-popup-menu';
 
 const WardrobeStack = createStackNavigator(
     {
@@ -55,7 +56,7 @@ ClothingStack.navigationOptions = ({ navigation }) => {
 	};
 };
 
-const TabNav =  createBottomTabNavigator(
+const TabNav = createBottomTabNavigator(
   {
     Home: HomeScreen,
     Closet: ClothingStack,
@@ -93,4 +94,14 @@ const TabNav =  createBottomTabNavigator(
   }
 );
 
-export default createAppContainer(TabNav);
+const AppContainer = createAppContainer(TabNav);
+
+export default class App extends React.Component {
+  render() {
+    return (
+      <MenuProvider>
+        <AppContainer />
+      </MenuProvider>
+    );
+  }
+}

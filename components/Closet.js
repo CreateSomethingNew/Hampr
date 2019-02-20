@@ -1,10 +1,10 @@
 import React from 'react';
-import { Text, View, SectionList, StyleSheet, 
+import { Text, View, SectionList, StyleSheet,
          ActionSheetIOS, FlatList, Image,
          TouchableWithoutFeedback, ScrollView } from 'react-native';
 import { Header, Icon } from 'react-native-elements';
 import { FlatGrid } from 'react-native-super-grid';
-import Menu, { MenuProvider, MenuOptions, 
+import Menu, { MenuOptions,
          MenuOption, MenuTrigger } from 'react-native-popup-menu';
 
 class ClosetScreen extends React.Component {
@@ -61,7 +61,7 @@ class ClosetScreen extends React.Component {
 
   switchHighLight = (item) => {
     item.highlight = !item.highlight
-    this.setState({ 
+    this.setState({
       refresh: !this.state.refresh
     })
   }
@@ -147,7 +147,7 @@ class ClosetScreen extends React.Component {
         onSelect={() => this.AddTag(sortList[i][0], globalState)} children=
       <View>
         <Text>{sortList[i][0]}</Text>
-        <Icon name='plus' type='entypo' color='#000000' underlayColor='transparent' 
+        <Icon name='plus' type='entypo' color='#000000' underlayColor='transparent'
               containerStyle={{ position: 'absolute', top: 0, right: 10 }} size={20} />
       </View> />);
     }
@@ -162,20 +162,20 @@ class ClosetScreen extends React.Component {
        children=
       <View>
         <Text>{name}</Text>
-        <Icon name='cross' type='entypo' color='#000000' underlayColor='transparent' 
+        <Icon name='cross' type='entypo' color='#000000' underlayColor='transparent'
               containerStyle={{ position: 'absolute', top: 0, right: 10 }} size={20} />
       </View> />);
     });
     return tagComponentList;
   }
 
-  menuIcon = (globalState) => { 
+  menuIcon = (globalState) => {
     const active = this.ActiveTags(globalState);
     const inactive = this.InactiveTags(globalState);
 
     return (
       <Menu>
-        <MenuTrigger customStyles={{ triggerTouchable: { underlayColor: 'transparent'} }} 
+        <MenuTrigger customStyles={{ triggerTouchable: { underlayColor: 'transparent'} }}
                      children=<Icon name='menu' color='#fff' /> />
         <MenuOptions>
           <ScrollView style={{ maxHeight: 200 }}>
@@ -188,15 +188,15 @@ class ClosetScreen extends React.Component {
         </MenuOptions>
       </Menu>
     );
-  } 
+  }
 
   backIcon = (
-    <Icon name='arrow-back' color='#fff' 
+    <Icon name='arrow-back' color='#fff'
           onPress={this.EnterClosetScreen.bind(this)} underlayColor='transparent' />
   )
 
   saveIcon = (
-    <Icon name='check' color='#fff' 
+    <Icon name='check' color='#fff'
           underlayColor='transparent' />
   )
 
@@ -247,7 +247,7 @@ class ClosetScreen extends React.Component {
   renderItem = (item, navigate, state) => {
     if(state.routeName === "Outfit") {
       return (
-        <View style={{ flex: 1, flexDirection: 'column', backgroundColor: '#fff0b3', 
+        <View style={{ flex: 1, flexDirection: 'column', backgroundColor: '#fff0b3',
                        borderColor: '#ffff00', borderWidth: 5, margin: 3 }}>
           <TouchableWithoutFeedback onPress={this.switchHighLight.bind(this, item)}>
             <Image style={styles.imageThumbnail} source={{ uri: item.src }}/>
@@ -259,7 +259,7 @@ class ClosetScreen extends React.Component {
     else {
       if(this.state.select === false) {
         return (
-          <View style={{ flex: 1, flexDirection: 'column', backgroundColor: '#fff0b3', 
+          <View style={{ flex: 1, flexDirection: 'column', backgroundColor: '#fff0b3',
                          borderColor: '#fff', borderWidth: 5, margin: 3 }}>
             <TouchableWithoutFeedback onPress={this.GetSectionListItem.bind(this, navigate, item)}
               onLongPress={this.enterSelect.bind(this)}>
@@ -272,7 +272,7 @@ class ClosetScreen extends React.Component {
       else {
         if(item.highlight === true) {
           return (
-            <View style={{ flex: 1, flexDirection: 'column', backgroundColor: '#fff0b3', 
+            <View style={{ flex: 1, flexDirection: 'column', backgroundColor: '#fff0b3',
                            borderColor: '#ffff00', borderWidth: 5, margin: 3 }}>
               <TouchableWithoutFeedback onPress={this.switchHighLight.bind(this, item)}>
                 <Image style={styles.imageThumbnail} source={{ uri: item.src }}/>
@@ -280,10 +280,10 @@ class ClosetScreen extends React.Component {
               <Text style={styles.text}>{item.name}</Text>
             </View>
           );
-        } 
+        }
         else if(item.highlight === false ) {
           return (
-            <View style={{ flex: 1, flexDirection: 'column', backgroundColor: '#fff0b3', 
+            <View style={{ flex: 1, flexDirection: 'column', backgroundColor: '#fff0b3',
                            borderColor: '#fff', borderWidth: 5, margin: 3 }}>
               <TouchableWithoutFeedback onPress={this.switchHighLight.bind(this, item)}>
                 <Image style={styles.imageThumbnail} source={{ uri: item.src }}/>
@@ -374,36 +374,35 @@ class ClosetScreen extends React.Component {
     const { navigate } = this.props.navigation;
     const { state } = this.props.navigation;
     const typeFilter = <View style={{  height: 40 }}>
-                        <ScrollView style={{ backgroundColor: "#dcdcdc" }} 
+                        <ScrollView style={{ backgroundColor: "#dcdcdc" }}
                       horizontal={true} >
                       { this.createScrollButtons() }
                       </ScrollView>
                       </View>;
     const numItemsHighlight = this.getNumHighlight(this.state.dataSource);
     const addToCart = <TouchableWithoutFeedback onPress={this.EnterOutfitScreen.bind(this)}>
-                        <View style={{ height: 50, backgroundColor: 'green', 
+                        <View style={{ height: 50, backgroundColor: 'green',
                                      justifyContent: 'center', alignItems: 'center' }}>
                         <Text >Add {numItemsHighlight} to cart</Text>
                         </View>
                       </TouchableWithoutFeedback>;
 
     return (
-      <MenuProvider>
         <View style={styles.container}>
           { this.renderHeader(state, this.state) }
           { state.routeName === "Clothing" ? typeFilter : null }
           <FlatGrid
             itemDimension={130}
-            items={ this.highlightFilter(this.state.dataSource, state, this.state.curType, 
+            items={ this.highlightFilter(this.state.dataSource, state, this.state.curType,
               this.state.curTags) }
             renderItem={({ item }) => (
                 this.renderItem(item, navigate, state)
               )}
             spacing={0}
           />
+          { this.state.select ? addToCart : null }
         </View>
-        { this.state.select ? addToCart : null }
-      </MenuProvider>
+
     );
   }
 }
@@ -415,8 +414,8 @@ const styles = StyleSheet.create({
    alignItems: 'stretch',
   },
   text: {
-    textAlign: 'center', 
-    fontSize: 18, 
+    textAlign: 'center',
+    fontSize: 18,
     fontWeight: 'bold',
     fontFamily: "Optima",
   },
