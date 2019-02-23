@@ -1,17 +1,19 @@
 import React from 'react';
 import { Text, View, SectionList, StyleSheet, 
          ActionSheetIOS, FlatList, Image,
-         TouchableWithoutFeedback, ScrollView } from 'react-native';
+         TouchableWithoutFeedback, ScrollView, TextInput } from 'react-native';
 import { Header, Icon } from 'react-native-elements';
 import { FlatGrid } from 'react-native-super-grid';
 import Menu, { MenuProvider, MenuOptions, 
          MenuOption, MenuTrigger } from 'react-native-popup-menu';
+import Modal from 'react-native-modal';
 
 class ClosetScreen extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { curTags: [], curType: 'All', dataSource: [], refresh: false, select: false };
+    this.state = { curTags: [], curType: 'All', dataSource: [], 
+                   refresh: false, select: false, modalVisible: false, outFitName: "Name" };
   }
 
   componentDidMount() {
@@ -95,6 +97,12 @@ class ClosetScreen extends React.Component {
     this.props.navigation.navigate('Clothing', {
       outfitState: tempSource,
     });
+  }
+
+  toggleModal = () => {
+    this.setState({
+      modalVisible : true
+    })
   }
 
   RemoveTag = (tag, globalState) => {
@@ -197,7 +205,7 @@ class ClosetScreen extends React.Component {
 
   saveIcon = (
     <Icon name='check' color='#fff' 
-          underlayColor='transparent' />
+          underlayColor='transparent' onPress={this.toggleModal.bind(this)} />
   )
 
   selectText = (
@@ -336,9 +344,10 @@ class ClosetScreen extends React.Component {
     let marginLeft;
     let typeFreq = {};
     let sortList = [];
-    buttons.push(<Text style={{ fontSize: 24, marginLeft: 20, marginRight: 20, paddingTop: 4 }}
-                  onPress={this.ChangeFilter.bind(this, "All")}>
-                 All</Text>);
+    buttons.push(<TouchableWithoutFeedback onPress={this.ChangeFilter.bind(this, "All")}>
+                  <View>
+                  <Text style={{ fontSize: 24, marginLeft: 20, marginRight: 20, paddingTop: 4 }}>
+                 All</Text></View></TouchableWithoutFeedback>);
     this.state.dataSource.forEach(function(item) {
       item.type.forEach(function(curType) {
         if(!(curType in typeFreq))
@@ -354,9 +363,9 @@ class ClosetScreen extends React.Component {
       return b[1] - a[1];
     });
     for (let i = 0; i < sortList.length; i++) {
-      buttons.push(<Text style={{ fontSize: 24, marginRight: 20, paddingTop: 4 }}
-                         onPress={this.ChangeFilter.bind(this, sortList[i][0])}>
-                         {sortList[i][0]}</Text>);
+      buttons.push(<TouchableWithoutFeedback onPress={this.ChangeFilter.bind(this, sortList[i][0])}>
+                  <View><Text style={{ fontSize: 24, marginRight: 20, paddingTop: 4 }}>
+                         {sortList[i][0]}</Text></View></TouchableWithoutFeedback>);
     }
     return buttons;
   }
@@ -392,6 +401,23 @@ class ClosetScreen extends React.Component {
         <View style={styles.container}>
           { this.renderHeader(state, this.state) }
           { state.routeName === "Clothing" ? typeFilter : null }
+          <Modal isVisible={this.state.modalVisible} animationInTime={600}
+                 onBackdropPress={() => this.setState({modalVisible: false})}>
+            <View style={{ height: 300, backgroundColor: 'white', flexDirection: 'column',
+                           alignItems: 'center' }}>
+              <Text style={{ fontSize: 18, fontWeight: 'bold', paddingTop: 20 }}>
+                Add Image
+              </Text>
+              <Icon name='image' underlayColor='transparent' size={60} />
+              <Text style={{ fontSize: 18, fontWeight: 'bold', paddingTop: 20 }}>
+                Enter Name
+              </Text>
+              <TextInput
+                style={{height: 40, width: 200, borderColor: 'gray', borderWidth: 1}}
+                onChangeText={(outfitName) => this.setState({outfitName})}
+                placeholder={"Name"}/>
+            </View>
+          </Modal>
           <FlatGrid
             itemDimension={130}
             items={ this.highlightFilter(this.state.dataSource, state, this.state.curType, 
