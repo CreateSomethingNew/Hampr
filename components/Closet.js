@@ -1,7 +1,8 @@
 import React from 'react';
 import { Text, View, SectionList, StyleSheet,
          ActionSheetIOS, FlatList, Image,
-         TouchableWithoutFeedback, ScrollView, TextInput } from 'react-native';
+         TouchableWithoutFeedback, ScrollView, TextInput,
+         Button } from 'react-native';
 import { Header, Icon } from 'react-native-elements';
 import { FlatGrid } from 'react-native-super-grid';
 import Menu, { MenuOptions,
@@ -13,7 +14,7 @@ class ClosetScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = { curTags: [], curType: 'All', dataSource: [], 
-                   refresh: false, select: false, modalVisible: false, outFitName: "Name" };
+                   refresh: false, select: false, modalVisible: false, outFitName: "" };
   }
 
   componentDidMount() {
@@ -53,9 +54,51 @@ class ClosetScreen extends React.Component {
 
       this.setState({
         dataSource: items,
+        select: false
       });
     }
   }
+
+  willFocus = this.props.navigation.addListener(
+    'willFocus',
+    () => {
+      if(this.props.navigation.getParam('repoll', null) === null)
+        return;
+      else {
+        let items = Array.apply(null, Array(15)).map((v, i) => {
+          return { id: i, src: 'http://placehold.it/200x200?text=' + (i + 1) };
+        });
+
+        i = 0
+        items.forEach(function (item) {
+          item['type'] = [];
+          item['tags'] = [];
+            item['highlight'] = false;
+            if(i % 5 === 0) {
+              item['name'] = "Green Shirt";
+              item['type'].push("Shirt");
+              item['tags'].push("Green");
+              item['tags'].push("Striped");
+            }
+            else if(i % 3 === 0) {
+              item['name'] = "Red Pants";
+              item['type'].push("Pants");
+              item['tags'].push("Red");
+            }
+            else {
+              item['name'] = "Poop";
+              item['type'].push("Poop");
+            }
+            i++;
+        });
+
+        this.setState({
+          curTags: [], curType: 'All', dataSource: items, 
+          refresh: false, select: false, modalVisible: false, outFitName: ""
+        });
+      }
+    }
+  );
 
 	GetSectionListItem = (navigate, item) => {
       navigate('ClothingItem');
@@ -95,7 +138,7 @@ class ClosetScreen extends React.Component {
   EnterClosetScreen = () => {
     tempSource = this.state.dataSource;
     this.props.navigation.navigate('Clothing', {
-      outfitState: tempSource,
+      anything: null,
     });
   }
 
@@ -379,6 +422,10 @@ class ClosetScreen extends React.Component {
     return num;
   }
 
+  saveOutfit = (navigate) => {
+    navigate('Clothing', { repoll: true });
+  }
+
   render() {
     const { navigate } = this.props.navigation;
     const { state } = this.props.navigation;
@@ -402,19 +449,25 @@ class ClosetScreen extends React.Component {
           { state.routeName === "Clothing" ? typeFilter : null }
           <Modal isVisible={this.state.modalVisible} animationInTime={600}
                  onBackdropPress={() => this.setState({modalVisible: false})}>
-            <View style={{ height: 300, backgroundColor: 'white', flexDirection: 'column',
+            <View style={{ height: 270, backgroundColor: 'white', flexDirection: 'column',
                            alignItems: 'center' }}>
               <Text style={{ fontSize: 18, fontWeight: 'bold', paddingTop: 20 }}>
                 Add Image
               </Text>
-              <Icon name='image' underlayColor='transparent' size={60} />
-              <Text style={{ fontSize: 18, fontWeight: 'bold', paddingTop: 20 }}>
+              <Icon name='image' underlayColor='transparent' size={120} />
+              <Text style={{ fontSize: 18, fontWeight: 'bold', paddingTop: 0 }}>
                 Enter Name
               </Text>
               <TextInput
                 style={{height: 40, width: 200, borderColor: 'gray', borderWidth: 1}}
-                onChangeText={(outfitName) => this.setState({outfitName})}
-                placeholder={"Name"}/>
+                onChangeText={(outFitName) => this.setState({outFitName})}
+              />
+              <Button
+                style={{ paddingTop: 40 }}
+                title="Save"
+                color="#841584"
+                onPress={this.saveOutfit.bind(this, navigate)}
+              />
             </View>
           </Modal>
           <FlatGrid
@@ -428,7 +481,6 @@ class ClosetScreen extends React.Component {
           />
           { this.state.select ? addToCart : null }
         </View>
-
     );
   }
 }
