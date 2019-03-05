@@ -79,16 +79,9 @@ class WardrobeScreen extends React.Component {
       });
   }
 
-  addOutfitDate(id, date) {
-    this.state.outfits[id].dates.push(date);
-  }
-
   renderGridTile(outfit) {
     let navigation = this.props.navigation;
-    let outfits = this.state.outfits;
-    let garments = this.state.garments;
-    let addOutfitDate = this.addOutfitDate.bind(this);
-    let childProps = { outfit, outfits, garments, addOutfitDate };
+    let childProps = { outfit, ...this.state };
     return (
       <View style={styles.gridTile}>
       <TouchableWithoutFeedback>
@@ -112,7 +105,7 @@ class WardrobeScreen extends React.Component {
         <MenuOptions
           customStyles={{optionsContainer: styles.menuOptions}}>
             <MenuOption
-              onSelect={()=>{console.log("\nOPTION ONSELECT\n");navigation.navigate('Calendar', childProps)}}
+              onSelect={()=>{navigation.navigate('Calendar', childProps)}}
               children=<Text style={styles.menuText}>Add to Calendar</Text>
             />
         </MenuOptions>
@@ -124,6 +117,11 @@ class WardrobeScreen extends React.Component {
   }
 
   render() {
+    let navigation = this.props.navigation;
+    let outfits = this.state.outfits;
+    let garments = this.state.garments;
+    let childProps = { outfits, garments };
+
     Title = <Text style={styles.title}>Wardrobe</Text>
 
     CalendarButton =
@@ -132,7 +130,7 @@ class WardrobeScreen extends React.Component {
         type='ionicon'
         color='white'
         underlayColor='transparent'
-        onPress={() => this.props.navigation.navigate('Calendar')}
+        onPress={() => navigation.navigate('Calendar', childProps)}
         hitSlop={{left: 30, top: 10, bottom: 10}}/>
 
     return (
@@ -161,7 +159,6 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    alignItems: 'center'
   },
   gridTile: {
     backgroundColor: '#fff0b3',

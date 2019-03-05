@@ -4,22 +4,23 @@ import { Header, Icon } from 'react-native-elements';
 import { Calendar, CalendarList } from 'react-native-calendars';
 import moment from "moment";
 
-const DOT = { key: 0, color: '#2d4150', selectedDotColor: '#ffffff' };
-
 class CalendarScreen extends React.Component {
 
   constructor(props) {
     super(props);
     let selectedDate = "";
     let markedDates = {};
-    this.state = { selectedDate, markedDates,
-      ...this.props.navigation.state.params };
+    let params = this.props.navigation.state.params;
+    this.state = { selectedDate, markedDates, ...params };
+    this.state.outfits = this.state.outfits || {};
+    this.state.garments = this.state.garments || {};
     Object.values(this.state.outfits)
       .forEach(outfit => outfit.dates.forEach(date => {
-        //let dot = { key: 0, selectedDotColor: '#ffffff' };
-
-        markedDates[date] = markedDates[date] || { dots: [] };
-        markedDates[date].dots.push(DOT);
+        let key = outfit.id;
+        let dot = { key, ...dotStyle }
+        markedDates[date] = markedDates[date] || {};
+        markedDates[date].dots = markedDates[date].dots || [];
+        markedDates[date].dots.push(dot);
       }));
   }
 
@@ -30,19 +31,27 @@ class CalendarScreen extends React.Component {
   handleSavePress() {
     let id = this.state.outfit.id;
     let date = this.state.selectedDate;
-    this.state.addOutfitDate(id, date);
+    let dates = this.state.outfits[id].dates;
+    if (!dates.includes(date)) {
+      this.state.outfits[id].dates.push(date);
+    }
     this.props.navigation.goBack();
   }
 
   handleDayPress(day) {
-    let selectedDate = this.state.selectedDate;
-    let markedDates = Object.assign({}, this.state.markedDates);
-
     // navigate to Day screen if not adding outfit to calendar
     if (!this.state.outfit) {
-      this.props.navigation.navigate('Day', { day });
+      let date = day.dateString;
+      let markedDates = this.state.markedDates;
+      let outfits = this.state.outfits;
+      let garments = this.state.garments;
+      let childProps = { date, markedDates, outfits, garments };
+      this.props.navigation.navigate('Day', childProps);
       return;
     }
+
+    let selectedDate = this.state.selectedDate;
+    let markedDates = Object.assign({}, this.state.markedDates);
 
     // deselect old date
     if (selectedDate) {
@@ -63,7 +72,9 @@ class CalendarScreen extends React.Component {
 
     Title = <Text style={styles.title}>Calendar</Text>
     BackButton =
-      <Icon name='ios-arrow-back' onPress={() => this.props.navigation.goBack()}
+      <Icon
+        name='ios-arrow-back'
+        onPress={() => this.props.navigation.goBack()}
         underlayColor='transparent' type='ionicon' color='white'
         hitSlop={{right: 30, top: 10, bottom: 10}} />
     SaveButton =
@@ -100,6 +111,11 @@ class CalendarScreen extends React.Component {
   }
 }
 
+const dotStyle = {
+  color: '#2d4150',
+  selectedDotColor: '#ffffff',
+};
+
 const styles = StyleSheet.create({
   title: {
     color: 'white',
@@ -125,7 +141,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     alignItems: 'center',
     justifyContent: 'center'
-  }
+  },
 });
 
 
