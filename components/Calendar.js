@@ -8,12 +8,27 @@ class CalendarScreen extends React.Component {
 
   constructor(props) {
     super(props);
-    let selectedDate = "";
     let markedDates = {};
+    let selectedDate = "";
+    let refresh = false;
     let params = this.props.navigation.state.params;
-    this.state = { selectedDate, markedDates, ...params };
+    this.state = { markedDates, selectedDate, refresh, ...params };
     this.state.outfits = this.state.outfits || {};
     this.state.garments = this.state.garments || {};
+  }
+
+  componentDidMount() {
+    this.markDates();
+    console.log("Calendar - did mount")
+  }
+
+  refresh() {
+    this.setState({ refresh: !this.state.refresh });
+  }
+
+  markDates() {
+    let markedDates = {}
+    let selectedDate = this.state.selectedDate;
     Object.values(this.state.outfits)
       .forEach(outfit => outfit.dates.forEach(date => {
         let key = outfit.id;
@@ -22,10 +37,17 @@ class CalendarScreen extends React.Component {
         markedDates[date].dots = markedDates[date].dots || [];
         markedDates[date].dots.push(dot);
       }));
+    if (selectedDate) {
+      markedDates[selectedDate].selected = true;
+    }
+    this.setState({ markedDates });
   }
 
-  componentDidMount() {
-    console.log("Calendar - did mount")
+  getDayOutfits(date) {
+    let outfits = this.state.outfits;
+    let markedDates = this.state.markedDates;
+    return date in markedDates && 'dots' in markedDates[date] ?
+      markedDates[date].dots.map(dot => outfits[dot.key]) : [];
   }
 
   handleSavePress() {
@@ -42,10 +64,11 @@ class CalendarScreen extends React.Component {
     // navigate to Day screen if not adding outfit to calendar
     if (!this.state.outfit) {
       let date = day.dateString;
-      let markedDates = this.state.markedDates;
       let outfits = this.state.outfits;
       let garments = this.state.garments;
-      let childProps = { date, markedDates, outfits, garments };
+      let dayOutfits = this.getDayOutfits(date);
+      let markDates = this.markDates.bind(this);
+      let childProps = { date, outfits, garments, dayOutfits, markDates };
       this.props.navigation.navigate('Day', childProps);
       return;
     }
@@ -69,7 +92,8 @@ class CalendarScreen extends React.Component {
   }
 
   render() {
-
+    console.log("Rendering Calendar");
+    console.log(this.state.markedDates);
     Title = <Text style={styles.title}>Calendar</Text>
     BackButton =
       <Icon

@@ -8,18 +8,29 @@ class DayScreen extends React.Component {
 
   constructor(props) {
     super(props);
+    let refresh = false;
     let params = this.props.navigation.state.params;
-    this.state = { ...params };
+    this.state = { refresh, ...params };
     this.state.date = this.state.date || null;
-    this.state.markedDates = this.state.markedDates || {};
     this.state.outfits = this.state.outfits || {};
     this.state.garments = this.state.garments || {};
-    let markedDates = this.state.markedDates;
-    let date = this.state.date;
-    markedDates[date] = markedDates[date] || {};
-    markedDates[date].dots = markedDates[date].dots || [];
-    this.state.dayOutfits = markedDates[date].dots
-      .map(dot => this.state.outfits[dot.key]);
+    this.state.dayOutfits = this.state.dayOutfits || [];
+    this.state.markDates = this.state.markDates || (() => {});
+  }
+
+  componentDidMount() {
+    console.log("Day - did mount")
+  }
+
+  refresh() {
+    this.setState({ refresh: !this.state.refresh });
+  }
+
+  handleRemovePress(outfit, index) {
+    outfit.dates = outfit.dates.filter(date => date != this.state.date);
+    this.state.dayOutfits.splice(index, 1);
+    this.state.markDates();
+    this.refresh();
   }
 
   renderGridTile(outfit, index) {
@@ -48,7 +59,7 @@ class DayScreen extends React.Component {
         <MenuOptions
           customStyles={{optionsContainer: styles.menuOptions}}>
             <MenuOption
-              onSelect={()=>{}}
+              onSelect={() => { this.handleRemovePress(outfit, index) }}
               children=<Text style={styles.menuText}>Remove</Text>
             />
         </MenuOptions>
