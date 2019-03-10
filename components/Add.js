@@ -1,17 +1,20 @@
 import React from 'react';
 import { Button, FlatList, Form, Picker, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { ListItem, Icon } from 'react-native-elements';
+import { Header, Icon, ListItem } from 'react-native-elements';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Menu, { MenuProvider, MenuOptions, 
          MenuOption, MenuTrigger } from 'react-native-popup-menu';
 
 // TODO:
-// - wrap screen in MenuItem
-// - wrap popup in Menu, MenuTrigger
 // - provide data source of all garments
 // - scrape existing types/tags from data source
 
 const styles = {
+  title: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
   form: {
     flex: 3,
     justifyContent: 'left',
@@ -22,6 +25,8 @@ const styles = {
     borderBottomColor: '#bbb',
     height: 30,
     padding: 5,
+    marginHorizontal: 5,
+    marginVertical: 2.5,
   },
 };
 
@@ -31,6 +36,7 @@ class SelectOrEnter extends React.Component {
     this.state = {
       actives: props.actives,
       inactives: this.getInactives(props.existings, props.actives),
+      existings: this.props.existings,
     };
   }
 
@@ -40,41 +46,61 @@ class SelectOrEnter extends React.Component {
     return inactives;
   };
 
-  addSelection = (event) => {
-    var text = event.nativeEvent.text
+  addSelection = (text) => {
+    var actives = this.state.actives.slice();
+    var inactives = this.state.inactives.slice();
+    var existings = this.state.existings.slice();
+
     if (text === '') {
       return;
     }
-    var actives = this.state.actives;
-    for (var i in actives) {
-      if (actives[i].text === text) {
-        return;
-      }
+
+    if (actives.includes(text)) {
+      return;
     }
-    actives = actives.slice();
-    actives.push({text: text});
+    actives.push(text);
+
+    if ((index = inactives.indexOf(text)) != -1) {
+      inactives.splice(index, 1);
+    }
+
     this.setState({
       actives: actives,
+      inactives: inactives,
+      existings: existings,
     });
-  }
+  };
 
   removeSelection = (text) => {
     var actives = this.state.actives.slice();
-    var i = actives.map(function(e) {
-      return e.text;
-    }).indexOf(text);
-    actives.splice(i, 1);
+    var inactives = this.state.inactives.slice();
+    var existings = this.state.existings.slice();
+
+    if (existings.includes(text)) {
+      inactives.push(text);
+    }
+
+    actives.splice(actives.indexOf(text), 1);
+
     this.setState({
-      actives: actives
+      actives: actives,
+      inactives: inactives,
+      existings: existings,
     });
-  }
+  };
 
   addPopup = (existings) => {
     return (
       <Menu>
         <MenuTrigger
           children={
-            <Text>{this.props.placeholder}</Text>
+            <View style={{justifyContent: 'center', backgroundColor: 'blue',
+                marginHorizontal: 5, marginVertical: 2.5}}>
+              <Text style={{fontSize: 24, fontWeight: 'bold', color: '#fff',
+                  textAlign: 'center'}}>
+                {this.props.placeholder}
+              </Text>
+            </View>
           }
         />
         <MenuOptions>
@@ -85,13 +111,11 @@ class SelectOrEnter extends React.Component {
               keyExtractor={(item, index) => index.toString()}
               renderItem={({item}) => (
                 <ListItem
-                  title={item.text}
+                  title={item}
                   rightIcon={
                     <Icon
-                      name='remove-circle'
-                      onPress={(event) => {
-                        this.removeSelection(item.text);
-                      }}
+                      name='add-circle'
+                      onPress={(envent) => this.addSelection(item)}
                     />
                   }
                 />
@@ -101,7 +125,9 @@ class SelectOrEnter extends React.Component {
               editable={true}
               placeholder={this.props.placeholder}
               style={styles.textInput}
-              onSubmitEditing={(text) => this.addSelection(text)}
+              onSubmitEditing={(event) => {
+                this.addSelection(event.nativeEvent.text)
+              }}
             />
           </ScrollView>
         </MenuOptions>
@@ -118,12 +144,12 @@ class SelectOrEnter extends React.Component {
           keyExtractor={(item, index) => index.toString()}
           renderItem={({item}) => (
             <ListItem
-              title={item.text}
+              title={item}
               rightIcon={
                 <Icon
                   name='remove-circle'
                   onPress={(event) => {
-                    this.removeSelection(item.text);
+                    this.removeSelection(item);
                   }}
                 />
               }
@@ -143,19 +169,25 @@ class AddScreen extends React.Component {
 
 
   render() {
+    title = <Text style={styles.title}>Add Garment</Text>
+
     return (
       <View style={{ flex: 1 }}>
+        <Header
+          centerComponent={title} 
+        />
         <View style={{ flex: 1, justifyContent: 'center' }}>
           <Icon
             name='image'
-            style={{ size: 64 }}
+            size={32}
+            color='#0000ff'
           />
         </View>
         <View style={{ flex: 3, justifyContent: 'left' }}>
-          <Text>Name</Text>
           <TextInput
             style={ styles.textInput }
             editable={true}
+            placeholder={'Garment Name'}
           />
           <SelectOrEnter
             placeholder='Enter Type'
