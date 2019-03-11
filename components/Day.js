@@ -3,14 +3,16 @@ import { Text, View, StyleSheet, TouchableWithoutFeedback, Image } from 'react-n
 import { Header, Icon } from 'react-native-elements';
 import { FlatGrid } from 'react-native-super-grid';
 import Menu, { MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
+import Modal from 'react-native-modal';
 
 class DayScreen extends React.Component {
 
   constructor(props) {
     super(props);
+    let addingOutfit = false;
     let refresh = false;
     let params = this.props.navigation.state.params;
-    this.state = { refresh, ...params };
+    this.state = { addingOutfit, refresh, ...params };
     this.state.date = this.state.date || null;
     this.state.outfits = this.state.outfits || {};
     this.state.garments = this.state.garments || {};
@@ -42,18 +44,17 @@ class DayScreen extends React.Component {
       <Menu>
         <Image
           style={styles.gridThumbnail}
-          source={{ uri: outfit.src }}
-        />
+          source={{ uri: outfit.src }} />
         <MenuTrigger
           children=
             <Icon
               name='ios-more'
               type='ionicon'
               color='black'
-              underlayColor='transparent'
-            />
+              underlayColor='transparent' />
           customStyles={{
-            triggerOuterWrapper: styles.moreButton
+            triggerOuterWrapper: styles.moreButton,
+            triggerTouchable: { underlayColor: 'transparent'}
           }}
         />
         <MenuOptions
@@ -65,6 +66,21 @@ class DayScreen extends React.Component {
         </MenuOptions>
         <Text style={styles.gridText}>{outfit.name}</Text>
       </Menu>
+      </TouchableWithoutFeedback>
+      </View>
+    );
+  }
+
+  renderModalGridTile(outfit, index) {
+    return (
+      <View style={styles.gridTile}>
+      <TouchableWithoutFeedback>
+      <View>
+        <Image
+          style={styles.gridThumbnail}
+          source={{ uri: outfit.src }} />
+        <Text style={styles.gridText}>{outfit.name}</Text>
+      </View>
       </TouchableWithoutFeedback>
       </View>
     );
@@ -86,8 +102,32 @@ class DayScreen extends React.Component {
         type='ionicon'
         color='white'
         underlayColor='transparent'
-        onPress={() => {}}
+        onPress={() => this.setState({ addingOutfit: true })}
         hitSlop={{left: 30, top: 10, bottom: 10}} />
+
+    AddModal =
+      <Modal
+        isVisible={this.state.addingOutfit}
+        animationInTime={600}
+        onBackdropPress={() => this.setState({ addingOutfit: false })}>
+        <View style={styles.modal}>
+          <Header containerStyle={styles.modalHeader}>
+            <Icon
+              name='ios-close'
+              onPress={() => this.setState({ addingOutfit: false })}
+              underlayColor='transparent'
+              type='ionicon'
+              color='white'
+              hitSlop={{right: 30, top: 10, bottom: 10}} />
+            <Text style={styles.modalTitle}>Outfits</Text>
+          </Header>
+          <FlatGrid
+            items={Object.values(this.state.outfits)}
+            itemDimension={130}
+            renderItem={({item, index}) => this.renderModalGridTile(item, index)}
+            spacing={0} />
+        </View>
+      </Modal>
 
     return (
       <View style={styles.container}>
@@ -102,6 +142,8 @@ class DayScreen extends React.Component {
           itemDimension={130}
           renderItem={({item, index}) => this.renderGridTile(item, index)}
           spacing={0}/>
+
+        {AddModal}
 
       </View>
     );
@@ -144,7 +186,21 @@ const styles = StyleSheet.create({
   },
   menuText: {
 
-  }
+  },
+  modal: {
+    height: 300,
+    backgroundColor: 'white',
+    flexDirection: 'column',
+    alignItems: 'center'
+  },
+  modalHeader: {
+    paddingTop: -20,
+    height: 40
+  },
+  modalTitle: {
+    color: 'white',
+    fontSize: 20,
+  },
 });
 
 export default DayScreen;

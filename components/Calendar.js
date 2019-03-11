@@ -1,8 +1,9 @@
 import React from 'react';
-import { Text, View, StyleSheet, TouchableWithoutFeedback } from 'react-native';
+import { Text, View, StyleSheet, TouchableWithoutFeedback, Image, ScrollView } from 'react-native';
 import { Header, Icon } from 'react-native-elements';
-import { Calendar, CalendarList } from 'react-native-calendars';
-import moment from "moment";
+import { CalendarList } from 'react-native-calendars';
+import { FlatGrid } from 'react-native-super-grid';
+import Modal from 'react-native-modal';
 
 class CalendarScreen extends React.Component {
 
@@ -11,8 +12,10 @@ class CalendarScreen extends React.Component {
     let markedDates = {};
     let selectedDate = "";
     let refresh = false;
+    let dayModalOutfits = [];
     let params = this.props.navigation.state.params;
-    this.state = { markedDates, selectedDate, refresh, ...params };
+    this.state = { markedDates, selectedDate, refresh, dayModalOutfits,
+      ...params };
     this.state.outfits = this.state.outfits || {};
     this.state.garments = this.state.garments || {};
   }
@@ -60,79 +63,126 @@ class CalendarScreen extends React.Component {
     this.props.navigation.goBack();
   }
 
+  navigateToDay(day) {
+    let date = day.dateString;
+    let outfits = this.state.outfits;
+    let garments = this.state.garments;
+    let dayOutfits = this.getDayOutfits(date);
+    let markDates = this.markDates.bind(this);
+    let childProps = { date, outfits, garments, dayOutfits, markDates };
+    this.props.navigation.navigate('Day', childProps);
+  }
+
   handleDayPress(day) {
-    // navigate to Day screen if not adding outfit to calendar
     if (!this.state.outfit) {
-      let date = day.dateString;
-      let outfits = this.state.outfits;
-      let garments = this.state.garments;
-      let dayOutfits = this.getDayOutfits(date);
-      let markDates = this.markDates.bind(this);
-      let childProps = { date, outfits, garments, dayOutfits, markDates };
-      this.props.navigation.navigate('Day', childProps);
+      this.navigateToDay(day);
       return;
     }
-
     let selectedDate = this.state.selectedDate;
-    let markedDates = Object.assign({}, this.state.markedDates);
-
-    // deselect old date
+    let markedDates = { ...this.state.markedDates };
     if (selectedDate) {
-      let dots = markedDates[selectedDate].dots;
-      delete markedDates[selectedDate];
-      if (dots) {
-        markedDates[selectedDate] = { dots };
-      }
+      markedDates[selectedDate] = { ...markedDates[selectedDate] };
+      delete markedDates[selectedDate].selected;
     }
-
-    // select new date
     selectedDate = day.dateString;
-    markedDates[selectedDate] = { selected: true, ...markedDates[selectedDate] };
+    markedDates[selectedDate] = { ...markedDates[selectedDate] };
+    markedDates[selectedDate].selected = true;
     this.setState({ selectedDate, markedDates });
   }
 
+  handleDayLongPress(day) {
+    this.setState({ dayModalOutfits: this.getDayOutfits(day.dateString) });
+    console.log("day long press");
+    console.log(this.state.dayModalVisible);
+  }
+
+  renderModalGridTile(outfit) {
+    return (
+      <View style={styles.gridTile}>
+      <TouchableWithoutFeedback>
+      <View>
+        <Image
+          style={styles.gridThumbnail}
+          source={{ uri: outfit.src }} />
+        <Text style={styles.gridText}>{outfit.name}</Text>
+        </View>
+      </TouchableWithoutFeedback>
+      </View>
+    );
+  }
+
   render() {
-    console.log("Rendering Calendar");
-    console.log(this.state.markedDates);
+
     Title = <Text style={styles.title}>Calendar</Text>
+
     BackButton =
       <Icon
         name='ios-arrow-back'
         onPress={() => this.props.navigation.goBack()}
-        underlayColor='transparent' type='ionicon' color='white'
+        underlayColor='transparent'
+        type='ionicon'
+        color='white'
         hitSlop={{right: 30, top: 10, bottom: 10}} />
+
     SaveButton =
       <TouchableWithoutFeedback onPress={this.handleSavePress.bind(this)}>
         <View style={styles.saveButton}>
           <Text style={styles.text}>Save</Text>
         </View>
-      </TouchableWithoutFeedback>;
+      </TouchableWithoutFeedback>
+
+    DayModal =
+      <Modal
+        isVisible={this.state.dayModalOutfits.length > 0}
+        animationInTime={600}
+        onBackdropPress={() => this.setState({ dayModalOutfits: [] })}>
+        <View style={styles.modal}>
+          <Header containerStyle={styles.modalHeader}>
+            <Icon
+              name='ios-close'
+              onPress={() => this.setState({ dayModalOutfits: [] })}
+              underlayColor='transparent'
+              type='ionicon'
+              color='white'
+              hitSlop={{right: 30, top: 10, bottom: 10}} />
+            <Text style={styles.modalTitle}>Scheduled Outfits</Text>
+          </Header>
+          <FlatGrid
+            items={this.state.dayModalOutfits}
+            itemDimension={130}
+            renderItem={({item, index}) => this.renderModalGridTile(item, index)}
+            spacing={0} />
+        </View>
+      </Modal>
+
+    Calendar =
+      <CalendarList
+        onDayPress={this.handleDayPress.bind(this)}
+        onDayLongPress={this.handleDayLongPress.bind(this)}
+        monthFormat={'MMMM yyyy'}
+        onMonthChange={(month) => {console.log('month changed', month)}}
+        firstDay={0}
+        markedDates={this.state.markedDates}
+        markingType={'multi-dot'}
+        theme={{ ...calendarStyle }} />
 
     return (
       <View style={styles.container}>
-
         <Header
           leftComponent={BackButton}
           centerComponent={Title} />
-
-        <CalendarList
-          onDayPress={this.handleDayPress.bind(this)}
-          onDayLongPress={(day) => {console.log('selected day', day)}}
-          monthFormat={'MMMM yyyy'}
-          onMonthChange={(month) => {console.log('month changed', month)}}
-          firstDay={0}
-          markedDates={this.state.markedDates}
-          markingType={'multi-dot'}
-          theme={{
-            selectedDayBackgroundColor: '#00adf5',
-            dayTextColor: '#2d4150',
-          }} />
-
-        {this.state.selectedDate ? SaveButton : null}
+        {Calendar}
+        {DayModal}
+        {this.state.selectedDate.length > 0 && SaveButton}
 
       </View>
     );
   }
+}
+
+const calendarStyle = {
+  selectedDayBackgroundColor: '#00adf5',
+  dayTextColor: '#2d4150',
 }
 
 const dotStyle = {
@@ -165,6 +215,37 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     alignItems: 'center',
     justifyContent: 'center'
+  },
+  gridTile: {
+    backgroundColor: '#fff0b3',
+    borderColor: '#fff',
+    borderWidth: 5,
+    margin: 3,
+  },
+  gridText: {
+    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: 'bold',
+    fontFamily: "Optima",
+  },
+  gridThumbnail: {
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    height: 175,
+  },
+  modal: {
+    height: 300,
+    backgroundColor: 'white',
+    flexDirection: 'column',
+    alignItems: 'center'
+  },
+  modalHeader: {
+    paddingTop: -20,
+    height: 40
+  },
+  modalTitle: {
+    color: 'white',
+    fontSize: 20,
   },
 });
 

@@ -88,18 +88,16 @@ class WardrobeScreen extends React.Component {
       <Menu>
         <Image
           style={styles.gridThumbnail}
-          source={{ uri: outfit.src }}
-        />
+          source={{ uri: outfit.src }} />
         <MenuTrigger
           children=
             <Icon
               name='ios-more'
               type='ionicon'
-              color='black'
-              underlayColor='transparent'
-            />
+              color='black' />
           customStyles={{
-            triggerOuterWrapper: styles.moreButton
+            triggerOuterWrapper: styles.moreButton,
+            triggerTouchable: { underlayColor: 'transparent'}
           }}
         />
         <MenuOptions
