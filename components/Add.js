@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, FlatList, Form, Picker, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Header, Icon, ListItem } from 'react-native-elements';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import Menu, { MenuProvider, MenuOptions, 
+import Menu, { MenuProvider, MenuOptions,
          MenuOption, MenuTrigger } from 'react-native-popup-menu';
 
 // TODO:
@@ -38,6 +38,7 @@ class SelectOrEnter extends React.Component {
       inactives: this.getInactives(props.existings, props.actives),
       existings: this.props.existings,
     };
+    this.parentActives = props.actives;
   }
 
   getInactives = (existings, actives) => {
@@ -69,12 +70,13 @@ class SelectOrEnter extends React.Component {
       inactives: inactives,
       existings: existings,
     });
+    this.props.alterParent(this.props.mode, actives);
   };
 
   removeSelection = (text) => {
     var actives = this.state.actives.slice();
     var inactives = this.state.inactives.slice();
-    var existings = this.state.existings.slice();
+    var existings = this.state.existings;
 
     if (existings.includes(text)) {
       inactives.push(text);
@@ -87,6 +89,7 @@ class SelectOrEnter extends React.Component {
       inactives: inactives,
       existings: existings,
     });
+    this.props.alterParent(this.props.mode, actives);
   };
 
   addPopup = (existings) => {
@@ -98,14 +101,14 @@ class SelectOrEnter extends React.Component {
                 marginHorizontal: 5, marginVertical: 2.5}}>
               <Text style={{fontSize: 24, fontWeight: 'bold', color: '#fff',
                   textAlign: 'center'}}>
-                {this.props.placeholder}
+                {this.props.mode.addMessage}
               </Text>
             </View>
           }
         />
         <MenuOptions>
           <ScrollView>
-            <Text>Existing Types/Tags</Text>
+            <Text>{this.props.mode.existingMessage}</Text>
             <FlatList
               data={this.state.inactives}
               keyExtractor={(item, index) => index.toString()}
@@ -123,10 +126,12 @@ class SelectOrEnter extends React.Component {
             />
             <TextInput
               editable={true}
-              placeholder={this.props.placeholder}
+              placeholder={this.props.mode.newMessage}
               style={styles.textInput}
+              ref={ref => this.textInputRef = ref}
               onSubmitEditing={(event) => {
-                this.addSelection(event.nativeEvent.text)
+                this.addSelection(event.nativeEvent.text);
+                this.textInputRef.clear();
               }}
             />
           </ScrollView>
@@ -162,11 +167,54 @@ class SelectOrEnter extends React.Component {
 }
 
 class AddScreen extends React.Component {
-  handleSubmit() {
-
+  constructor(props) {
+    super(props);
+    title = '';
+    brand = '',
+    types = [];
+    tags = [];
+    this.state = {
+      title: title,
+      brand: brand,
+      types: types,
+      tags: tags,
+    };
+    console.log(this.state);
   }
 
+  handleSubmit = () => {
+    console.log(this.state);
+  }
 
+  Modes = Object.freeze({
+    TYPE: {
+      addMessage: 'Add Type',
+      existingMessage: 'Existing Types',
+      newMessage: 'New Type',
+      activesId: 'types',
+    },
+    TAG: {
+      addMessage: 'Add Tags',
+      existingMessage: 'Existing Tags',
+      newMessage: 'New Tags',
+      activesId: 'tags',
+    },
+  });
+
+  getChildState = (mode, actives) => {
+    switch (mode) {
+      case this.Modes.TYPE:
+        state = {types: actives};
+        break;
+      case this.Modes.TAG:
+        state = {tags: actives};
+        break;
+      default:
+        console.log('Unsupported mode');
+        return;
+    }
+    this.setState(state);
+  }
 
   render() {
     title = <Text style={styles.title}>Add Garment</Text>
@@ -174,7 +222,7 @@ class AddScreen extends React.Component {
     return (
       <View style={{ flex: 1 }}>
         <Header
-          centerComponent={title} 
+          centerComponent={title}
         />
         <View style={{ flex: 1, justifyContent: 'center' }}>
           <Icon
@@ -188,20 +236,29 @@ class AddScreen extends React.Component {
             style={ styles.textInput }
             editable={true}
             placeholder={'Garment Name'}
+            onChangeText={(text) => this.setState({title: text})}
+          />
+          <TextInput
+            style={styles.textInput}
+            editable={true}
+            placeholder='Garment Brand'
+            onChangeText={(text) => this.setState({brand: text})}
           />
           <SelectOrEnter
-            placeholder='Enter Type'
+            mode={this.Modes.TYPE}
             existings={['pants', 'shirts', 'poop']}
-            actives={[]}
+            actives={this.state.types}
+            alterParent={this.getChildState.bind(this)}
           />
           <SelectOrEnter
-            placeholder='Enter Tags'
+            mode={this.Modes.TAG}
             existings={['denim', 'formal', 'poop']}
-            actives={[]}
+            actives={this.state.tags}
+            alterParent={this.getChildState.bind(this)}
           />
         </View>
         <View>
-          <Button 
+          <Button
             title='Submit'
             onPress={this.handleSubmit}
           />
