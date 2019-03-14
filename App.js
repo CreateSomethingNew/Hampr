@@ -18,7 +18,8 @@ const WardrobeStack = createStackNavigator(
         Wardrobe: WardrobeScreen,
         Outfit: OutfitScreen,
         Calendar: CalendarScreen,
-        Day: DayScreen
+        Day: DayScreen,
+        Outfit: OutfitScreen
     },
     {
         initialRouteName: 'Wardrobe',

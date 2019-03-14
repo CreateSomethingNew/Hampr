@@ -84,7 +84,9 @@ class WardrobeScreen extends React.Component {
     let childProps = { outfit, ...this.state };
     return (
       <View style={styles.gridTile}>
-      <TouchableWithoutFeedback>
+      <TouchableWithoutFeedback
+        onPress={() => navigation.navigate('Outfit', childProps)}>
+      <View>
       <Menu>
         <Image
           style={styles.gridThumbnail}
@@ -103,12 +105,13 @@ class WardrobeScreen extends React.Component {
         <MenuOptions
           customStyles={{optionsContainer: styles.menuOptions}}>
             <MenuOption
-              onSelect={()=>{navigation.navigate('Calendar', childProps)}}
+              onSelect={() => navigation.navigate('Calendar', childProps)}
               children=<Text style={styles.menuText}>Add to Calendar</Text>
             />
         </MenuOptions>
         <Text style={styles.gridText}>{outfit.name}</Text>
       </Menu>
+      </View>
       </TouchableWithoutFeedback>
       </View>
     );

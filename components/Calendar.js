@@ -92,8 +92,6 @@ class CalendarScreen extends React.Component {
 
   handleDayLongPress(day) {
     this.setState({ dayModalOutfits: this.getDayOutfits(day.dateString) });
-    console.log("day long press");
-    console.log(this.state.dayModalVisible);
   }
 
   renderModalGridTile(outfit) {
@@ -203,7 +201,6 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    alignItems: 'center'
   },
   saveButton: {
     position: 'absolute',
@@ -237,7 +234,6 @@ const styles = StyleSheet.create({
     height: 300,
     backgroundColor: 'white',
     flexDirection: 'column',
-    alignItems: 'center'
   },
   modalHeader: {
     paddingTop: -20,
