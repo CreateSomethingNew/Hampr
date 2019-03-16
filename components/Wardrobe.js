@@ -85,7 +85,7 @@ class WardrobeScreen extends React.Component {
     return (
       <View style={styles.gridTile}>
       <TouchableWithoutFeedback
-        onPress={() => navigation.navigate('Outfit', childProps)}>
+        onPress={() => navigation.push('Outfit', childProps)}>
       <View>
       <Menu>
         <Image
@@ -105,8 +105,8 @@ class WardrobeScreen extends React.Component {
         <MenuOptions
           customStyles={{optionsContainer: styles.menuOptions}}>
             <MenuOption
-              onSelect={() => navigation.navigate('Calendar', childProps)}
-              children=<Text style={styles.menuText}>Add to Calendar</Text>
+              onSelect={() => navigation.push('Calendar', childProps)}
+              children=<Text style={styles.menuText}>Schedule</Text>
             />
         </MenuOptions>
         <Text style={styles.gridText}>{outfit.name}</Text>
@@ -127,11 +127,11 @@ class WardrobeScreen extends React.Component {
 
     CalendarButton =
       <Icon
-        name='ios-calendar'
-        type='ionicon'
+        name='calendar'
+        type='material-community'
         color='white'
         underlayColor='transparent'
-        onPress={() => navigation.navigate('Calendar', childProps)}
+        onPress={() => navigation.push('Calendar', childProps)}
         hitSlop={{left: 30, top: 10, bottom: 10}}/>
 
     return (

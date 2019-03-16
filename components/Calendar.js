@@ -70,7 +70,7 @@ class CalendarScreen extends React.Component {
     let dayOutfits = this.getDayOutfits(date);
     let markDates = this.markDates.bind(this);
     let childProps = { date, outfits, garments, dayOutfits, markDates };
-    this.props.navigation.navigate('Day', childProps);
+    this.props.navigation.push('Day', childProps);
   }
 
   handleDayPress(day) {

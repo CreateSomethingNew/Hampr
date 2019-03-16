@@ -53,7 +53,7 @@ class DayScreen extends React.Component {
     return (
       <View style={styles.gridTile}>
       <TouchableWithoutFeedback
-        onPress={() => navigation.navigate('Outfit', childProps)}>
+        onPress={() => navigation.push('Outfit', childProps)}>
       <View>
       <Menu>
         <Image

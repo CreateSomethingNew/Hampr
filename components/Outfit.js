@@ -70,11 +70,11 @@ class OutfitScreen extends React.Component {
 
     CalendarButton =
       <Icon
-        name='ios-calendar'
-        type='ionicon'
+        name='calendar-plus'
+        type='material-community'
         color='white'
         underlayColor='transparent'
-        onPress={() => navigation.navigate('Calendar', childProps)}
+        onPress={() => navigation.push('Calendar', childProps)}
         hitSlop={{left: 30, top: 10, bottom: 10}}/>
 
     return (
