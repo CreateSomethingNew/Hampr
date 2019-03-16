@@ -51,6 +51,11 @@ class OutfitScreen extends React.Component {
   }
 
   render() {
+    let navigation = this.props.navigation;
+    let outfit = this.state.outfit;
+    let outfits = this.state.outfits;
+    let garments = this.state.garments;
+    let childProps = { outfit, outfits, garments };
 
     Title = <Text style={styles.title}>{this.state.outfit.name}</Text>
 
@@ -63,12 +68,22 @@ class OutfitScreen extends React.Component {
         color='white'
         hitSlop={{right: 30, top: 10, bottom: 10}} />
 
+    CalendarButton =
+      <Icon
+        name='ios-calendar'
+        type='ionicon'
+        color='white'
+        underlayColor='transparent'
+        onPress={() => navigation.navigate('Calendar', childProps)}
+        hitSlop={{left: 30, top: 10, bottom: 10}}/>
+
     return (
       <View style={styles.container}>
 
       <Header>
         {BackButton}
         {Title}
+        {CalendarButton}
       </Header>
 
       <FlatGrid
