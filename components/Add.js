@@ -1,9 +1,10 @@
 import React from 'react';
-import { Button, FlatList, Form, Picker, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Button, FlatList, Form, Image, Picker, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Header, Icon, ListItem } from 'react-native-elements';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Menu, { MenuProvider, MenuOptions,
          MenuOption, MenuTrigger } from 'react-native-popup-menu';
+import { ImagePicker, Permissions } from 'expo';
 
 // TODO:
 // - provide data source of all garments
@@ -173,11 +174,13 @@ class AddScreen extends React.Component {
     brand = '',
     types = [];
     tags = [];
+    imageUri = '';
     this.state = {
       title: title,
       brand: brand,
       types: types,
       tags: tags,
+      imageUri: imageUri,
     };
     console.log(this.state);
   }
@@ -216,21 +219,73 @@ class AddScreen extends React.Component {
     this.setState(state);
   }
 
+  showPicker = () => {
+    console.log("first");
+    curThis = this;
+    this.getCameraAsync()
+    .then(curThis.getRollAsync().
+        then(curThis.pickImage()));
+  }
+
+  async pickImage() {
+    let result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [4, 3],
+      base64: true
+    });
+
+    console.log(result);
+
+    if(!result.cancelled) {
+      this.setState({ imageUri : result.uri })
+    }
+  }
+
+  async getCameraAsync() {
+    const { Permissions } = Expo;
+    const { status, permissions } = await Permissions.askAsync(Permissions.CAMERA);
+    if (status === 'granted') {
+      return "grant";
+    } else {
+      return "not grant";
+    }
+  }
+
+  async getRollAsync() {
+    const { Permissions } = Expo;
+    const { status, permissions } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+    if (status === 'granted') {
+      return "grant";
+    } else {
+      return "not grant";
+    }
+  }
+
   render() {
     title = <Text style={styles.title}>Add Garment</Text>
+
+    photo = <View style={{ flex: 1, justifyContent: 'center' }}>
+          <Icon
+            name='image'
+            size={32}
+            color='#0000ff'
+            onPress={() => this.showPicker()}
+          />
+          </View>
+
+    img = <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Image
+              style={{width: 120, height: 90}}
+              source={{uri: this.state.imageUri}}
+            />
+          </View>
 
     return (
       <View style={{ flex: 1 }}>
         <Header
           centerComponent={title}
         />
-        <View style={{ flex: 1, justifyContent: 'center' }}>
-          <Icon
-            name='image'
-            size={32}
-            color='#0000ff'
-          />
-        </View>
+        { this.state.imageUri === '' ? photo : img }
         <View style={{ flex: 3, justifyContent: 'left' }}>
           <TextInput
             style={ styles.textInput }
