@@ -14,8 +14,6 @@ class DayScreen extends React.Component {
     let params = this.props.navigation.state.params;
     this.state = { schedulingOutfit, refresh, ...params };
     this.state.date = this.state.date || null;
-    this.state.outfits = this.state.outfits || {};
-    this.state.garments = this.state.garments || {};
     this.state.dayOutfits = this.state.dayOutfits || [];
     this.state.markDates = this.state.markDates || (() => {});
   }
@@ -28,7 +26,7 @@ class DayScreen extends React.Component {
     this.setState({ refresh: !this.state.refresh });
   }
 
-  handleRemovePress(outfit, index) {
+  unscheduleOutfit(outfit, index) {
     outfit.dates = outfit.dates.filter(date => date != this.state.date);
     this.state.dayOutfits.splice(index, 1);
     this.state.markDates();
@@ -47,9 +45,7 @@ class DayScreen extends React.Component {
 
   renderGridTile(outfit, index) {
     let navigation = this.props.navigation;
-    let outfits = this.state.outfits;
-    let garments = this.state.garments;
-    let childProps = { outfit, outfits, garments };
+    let childProps = { outfit };
     return (
       <View style={styles.gridTile}>
       <TouchableWithoutFeedback
@@ -74,8 +70,8 @@ class DayScreen extends React.Component {
         <MenuOptions
           customStyles={{optionsContainer: styles.menuOptions}}>
             <MenuOption
-              onSelect={() => { this.handleRemovePress(outfit, index) }}
-              children=<Text style={styles.menuText}>Remove</Text>
+              onSelect={() => { this.unscheduleOutfit(outfit, index) }}
+              children=<Text style={styles.menuText}>Unschedule</Text>
             />
         </MenuOptions>
         <Text style={styles.gridText}>{outfit.name}</Text>
@@ -137,7 +133,7 @@ class DayScreen extends React.Component {
             <Text style={styles.modalTitle}>Outfits</Text>
           </Header>
           <FlatGrid
-            items={Object.values(this.state.outfits)}
+            items={Object.values(global.outfits)}
             itemDimension={130}
             renderItem={({item, index}) => this.renderModalGridTile(item, index)}
             spacing={0} />

@@ -11,7 +11,9 @@ import ClothingItemScreen from './components/ClothingItem.js';
 import OutfitScreen from './components/Outfit.js';
 import CalendarScreen from './components/Calendar.js';
 import DayScreen from './components/Day.js';
+import SplashScreen from './components/Splash.js';
 import { MenuProvider } from 'react-native-popup-menu';
+import GetData from './Api.js';
 
 const WardrobeStack = createStackNavigator(
     {
@@ -98,11 +100,31 @@ const TabNav = createBottomTabNavigator(
 const AppContainer = createAppContainer(TabNav);
 
 export default class App extends React.Component {
-  render() {
+  constructor(props) {
+    super(props);
+    this.state = { ready: false };
+  }
+
+  componentDidMount() {
+    GetData()
+      .then(() => {
+        this.setState({ ready: true });
+      });
+  }
+
+  renderSplash() {
+    return <SplashScreen/>;
+  }
+
+  renderApp() {
     return (
       <MenuProvider>
-        <AppContainer />
+        <AppContainer/>
       </MenuProvider>
     );
+  }
+
+  render() {
+    return this.state.ready ? this.renderApp() : this.renderSplash();
   }
 }

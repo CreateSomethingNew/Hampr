@@ -11,10 +11,8 @@ class OutfitScreen extends React.Component {
     let params = this.props.navigation.state.params;
     this.state = { ...params };
     this.state.outfit = this.state.outfit || {};
-    this.state.outfits = this.state.outfits || {};
-    this.state.garments = this.state.garments || {};
     this.state.outfitGarments = this.state.outfit.garments
-      .map(garmentId => this.state.garments[garmentId]);
+      .map(garmentId => global.garments[garmentId]);
   }
 
   renderGridTile(garment) {
@@ -53,9 +51,7 @@ class OutfitScreen extends React.Component {
   render() {
     let navigation = this.props.navigation;
     let outfit = this.state.outfit;
-    let outfits = this.state.outfits;
-    let garments = this.state.garments;
-    let childProps = { outfit, outfits, garments };
+    let childProps = { outfit };
 
     Title = <Text style={styles.title}>{this.state.outfit.name}</Text>
 
