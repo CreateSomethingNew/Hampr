@@ -14,14 +14,18 @@ class ClosetScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = { curTags: [], curType: 'All', dataSource: [], 
-                   refresh: false, select: false, modalVisible: false, outFitName: "" };
+                   refresh: false, modalVisible: false, outFitName: "" };
   }
 
   componentDidMount() {
     const outfitState = this.props.navigation.getParam('outfitState', null);
+    const curTags = this.props.navigation.getParam('curTags', null);
+    const curType = this.props.navigation.getParam('curType', null);
     if(outfitState != null) {
       this.setState({
         dataSource: outfitState,
+        curTags: curTags,
+        curType: curType
       });
     }
     else {
@@ -54,7 +58,6 @@ class ClosetScreen extends React.Component {
 
       this.setState({
         dataSource: items,
-        select: false
       });
     }
   }
@@ -62,8 +65,16 @@ class ClosetScreen extends React.Component {
   willFocus = this.props.navigation.addListener(
     'willFocus',
     () => {
-      if(this.props.navigation.getParam('repoll', null) === null)
+      if(this.props.navigation.getParam('repoll', null) === null) {
+      	const curTags = this.props.navigation.getParam('curTags', []);
+    		const curType = this.props.navigation.getParam('curType', "All");
+    		this.state.dataSource.forEach(function (item) { console.log(item)})
+    		this.setState({
+        	curTags: curTags,
+        	curType: curType
+      	});
         return;
+      }
       else {
         let items = Array.apply(null, Array(15)).map((v, i) => {
           return { id: i, src: 'http://placehold.it/200x200?text=' + (i + 1) };
@@ -94,7 +105,7 @@ class ClosetScreen extends React.Component {
 
         this.setState({
           curTags: [], curType: 'All', dataSource: items, 
-          refresh: false, select: false, modalVisible: false, outFitName: ""
+          refresh: false, modalVisible: false, outFitName: ""
         });
       }
     }
@@ -111,11 +122,25 @@ class ClosetScreen extends React.Component {
     })
   }
 
-  enterSelect = () => {
+  selectHighLight = (item) => {
+    item.highlight = !item.highlight
     this.setState({
-      select: true,
       refresh: !this.state.refresh
     })
+    tempSource = this.state.dataSource;
+    this.props.navigation.navigate('Select', {
+      outfitState: tempSource,
+      curTags: this.state.curTags,
+      curType: this.state.curType,
+    });
+  }
+
+  enterSelect = () => {
+    this.props.navigation.navigate('Select', {
+    	outfitState: this.state.dataSource,
+    	curTags: this.state.curTags,
+      curType: this.state.curType,
+    });
   }
 
   exitSelect = () => {
@@ -123,15 +148,22 @@ class ClosetScreen extends React.Component {
       item.highlight = false;
     })
     this.setState({
-      select: false,
       refresh: !this.state.refresh
     })
+    tempSource = this.state.dataSource;
+    this.props.navigation.navigate('Clothing', {
+    	outfitState: tempSource,
+    	curTags: this.state.curTags,
+      curType: this.state.curType,
+    });
   }
 
   EnterOutfitScreen = () => {
     tempSource = this.state.dataSource;
     this.props.navigation.navigate('Outfit', {
       outfitState: tempSource,
+      curTags: this.state.curTags,
+      curType: this.state.curType,
     });
   }
 
@@ -243,7 +275,7 @@ class ClosetScreen extends React.Component {
 
   backIcon = (
     <Icon name='arrow-back' color='#fff'
-          onPress={this.EnterClosetScreen.bind(this)} underlayColor='transparent' />
+          onPress={this.enterSelect.bind(this)} underlayColor='transparent' />
   )
 
   saveIcon = (
@@ -264,8 +296,8 @@ class ClosetScreen extends React.Component {
   )
 
   renderHeader(state, globalState) {
-    if(state.routeName === "Clothing") {
-      if(globalState.select) {
+    if(state.routeName === "Clothing" || state.routeName === "Select") {
+      if(state.routeName === "Select") {
         return (
           <Header
             leftComponent={ this.cancelText }
@@ -308,12 +340,12 @@ class ClosetScreen extends React.Component {
       );
     }
     else {
-      if(this.state.select === false) {
+      if(state.routeName === 'Clothing') {
         return (
           <View style={{ flex: 1, flexDirection: 'column', backgroundColor: '#fff0b3',
                          borderColor: '#fff', borderWidth: 5, margin: 3 }}>
             <TouchableWithoutFeedback onPress={this.GetSectionListItem.bind(this, navigate, item)}
-              onLongPress={this.enterSelect.bind(this)}>
+              onLongPress={this.selectHighLight.bind(this, item)}>
               <Image style={styles.imageThumbnail} source={{ uri: item.src }}/>
             </TouchableWithoutFeedback>
             <Text style={styles.text}>{item.name}</Text>
@@ -446,7 +478,7 @@ class ClosetScreen extends React.Component {
     return (
         <View style={styles.container}>
           { this.renderHeader(state, this.state) }
-          { state.routeName === "Clothing" ? typeFilter : null }
+          { state.routeName === "Clothing" || state.routeName === "Select" ? typeFilter : null }
           <Modal isVisible={this.state.modalVisible} animationInTime={600}
                  onBackdropPress={() => this.setState({modalVisible: false})}>
             <View style={{ height: 270, backgroundColor: 'white', flexDirection: 'column',
@@ -479,7 +511,7 @@ class ClosetScreen extends React.Component {
               )}
             spacing={0}
           />
-          { this.state.select ? addToCart : null }
+          { state.routeName === "Select" ? addToCart : null }
         </View>
     );
   }
