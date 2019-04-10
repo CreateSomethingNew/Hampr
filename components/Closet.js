@@ -14,7 +14,7 @@ class ClosetScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = { curTags: [], curType: 'All', dataSource: [], 
-                   refresh: false, modalVisible: false, outFitName: "" };
+                   refresh: false, modalVisible: false, outFitName: ""};
   }
 
   componentDidMount() {
@@ -25,39 +25,15 @@ class ClosetScreen extends React.Component {
       this.setState({
         dataSource: outfitState,
         curTags: curTags,
-        curType: curType
+        curType: curType,
       });
     }
     else {
-      let items = Array.apply(null, Array(15)).map((v, i) => {
-        return { id: i, src: 'http://placehold.it/200x200?text=' + (i + 1) };
-      });
-
-      i = 0
-      items.forEach(function (item) {
-        item['type'] = [];
-        item['tags'] = [];
-          item['highlight'] = false;
-          if(i % 5 === 0) {
-            item['name'] = "Green Shirt";
-            item['type'].push("Shirt");
-            item['tags'].push("Green");
-            item['tags'].push("Striped");
-          }
-          else if(i % 3 === 0) {
-            item['name'] = "Red Pants";
-            item['type'].push("Pants");
-            item['tags'].push("Red");
-          }
-          else {
-            item['name'] = "Poop";
-            item['type'].push("Poop");
-          }
-          i++;
-      });
-
+      Object.values(garments).forEach(function(item) {
+          item.highlight = false;
+      })
       this.setState({
-        dataSource: items,
+        dataSource: garments,
       });
     }
   }
@@ -68,48 +44,30 @@ class ClosetScreen extends React.Component {
       if(this.props.navigation.getParam('repoll', null) === null) {
       	const curTags = this.props.navigation.getParam('curTags', []);
     		const curType = this.props.navigation.getParam('curType', "All");
-    		this.state.dataSource.forEach(function (item) { console.log(item)})
     		this.setState({
         	curTags: curTags,
-        	curType: curType
+        	curType: curType,
       	});
         return;
       }
       else {
-        let items = Array.apply(null, Array(15)).map((v, i) => {
-          return { id: i, src: 'http://placehold.it/200x200?text=' + (i + 1) };
-        });
-
-        i = 0
-        items.forEach(function (item) {
-          item['type'] = [];
-          item['tags'] = [];
-            item['highlight'] = false;
-            if(i % 5 === 0) {
-              item['name'] = "Green Shirt";
-              item['type'].push("Shirt");
-              item['tags'].push("Green");
-              item['tags'].push("Striped");
-            }
-            else if(i % 3 === 0) {
-              item['name'] = "Red Pants";
-              item['type'].push("Pants");
-              item['tags'].push("Red");
-            }
-            else {
-              item['name'] = "Poop";
-              item['type'].push("Poop");
-            }
-            i++;
-        });
-
+        Object.values(garments).forEach(function(item) {
+          item.highlight = false;
+        })
         this.setState({
-          curTags: [], curType: 'All', dataSource: items, 
-          refresh: false, modalVisible: false, outFitName: ""
+          curTags: [], curType: 'All', dataSource: garments, 
+          refresh: false, modalVisible: false, outFitName: "",
         });
       }
     }
   );
+
+  genUniqueID = () => {
+    var S4 = function() {
+       return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+    };
+    return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
+  }
 
 	GetSectionListItem = (navigate, item) => {
       navigate('ClothingItem');
@@ -144,7 +102,7 @@ class ClosetScreen extends React.Component {
   }
 
   exitSelect = () => {
-    this.state.dataSource.forEach(function(item) {
+    Object.values(this.state.dataSource).forEach(function(item) {
       item.highlight = false;
     })
     this.setState({
@@ -208,7 +166,7 @@ class ClosetScreen extends React.Component {
     tagFreq = {};
     sortList = [];
     inactiveTagComponentList = [];
-    globalState.dataSource.forEach(function(item) {
+    Object.values(globalState.dataSource).forEach(function(item) {
       item.tags.forEach(function(curTag) {
         if(!(globalState.curTags.includes(curTag))) {
           if(!(curTag in tagFreq))
@@ -227,7 +185,7 @@ class ClosetScreen extends React.Component {
 
     for (let i = 0; i < sortList.length; i++) {
       inactiveTagComponentList.push(<MenuOption
-        onSelect={() => this.AddTag(sortList[i][0], globalState)} children=
+        key={this.genUniqueID()} onSelect={() => this.AddTag(sortList[i][0], globalState)} children=
       <View>
         <Text>{sortList[i][0]}</Text>
         <Icon name='plus' type='entypo' color='#000000' underlayColor='transparent'
@@ -241,7 +199,7 @@ class ClosetScreen extends React.Component {
     tagComponentList = [];
     let something = this;
     globalState.curTags.forEach(function(name) {
-      tagComponentList.push(<MenuOption onSelect={() => something.RemoveTag(name, globalState)}
+      tagComponentList.push(<MenuOption key={this.genUniqueID()} onSelect={() => something.RemoveTag(name, globalState)}
        children=
       <View>
         <Text>{name}</Text>
@@ -382,7 +340,7 @@ class ClosetScreen extends React.Component {
   highlightFilter = (items, propState, type, curTags) => {
     if(propState.routeName === "Outfit") {
       highlightList = [];
-      items.forEach(function(item) {
+      Object.values(items).forEach(function(item) {
         if(item.highlight === true)
           highlightList.push(item);
       })
@@ -390,8 +348,8 @@ class ClosetScreen extends React.Component {
     }
     else {
       filterList = [];
-      items.forEach(function(item) {
-        if(item.type.includes(type) || type == "All") {
+      Object.values(items).forEach(function(item) {
+        if(item.types.includes(type) || type == "All") {
           viewFlag = true;
           for(var i = 0; i < curTags.length; i++) {
             if(!(item.tags.includes(curTags[i]))) {
@@ -419,12 +377,12 @@ class ClosetScreen extends React.Component {
     let marginLeft;
     let typeFreq = {};
     let sortList = [];
-    buttons.push(<TouchableWithoutFeedback onPress={this.ChangeFilter.bind(this, "All")}>
+    buttons.push(<TouchableWithoutFeedback key={this.genUniqueID()} onPress={this.ChangeFilter.bind(this, "All")}>
                   <View>
                   <Text style={{ fontSize: 24, marginLeft: 20, marginRight: 20, paddingTop: 4 }}>
                  All</Text></View></TouchableWithoutFeedback>);
-    this.state.dataSource.forEach(function(item) {
-      item.type.forEach(function(curType) {
+    Object.values(this.state.dataSource).forEach(function(item) {
+      item.types.forEach(function(curType) {
         if(!(curType in typeFreq))
           typeFreq[curType] = 1;
         else
@@ -438,7 +396,7 @@ class ClosetScreen extends React.Component {
       return b[1] - a[1];
     });
     for (let i = 0; i < sortList.length; i++) {
-      buttons.push(<TouchableWithoutFeedback onPress={this.ChangeFilter.bind(this, sortList[i][0])}>
+      buttons.push(<TouchableWithoutFeedback key={this.genUniqueID()} onPress={this.ChangeFilter.bind(this, sortList[i][0])}>
                   <View><Text style={{ fontSize: 24, marginRight: 20, paddingTop: 4 }}>
                          {sortList[i][0]}</Text></View></TouchableWithoutFeedback>);
     }
@@ -447,7 +405,7 @@ class ClosetScreen extends React.Component {
 
   getNumHighlight = (dataSource) => {
     let num = 0;
-    dataSource.forEach(function(item) {
+    Object.values(dataSource).forEach(function(item) {
       if(item.highlight)
         num += 1;
     })
