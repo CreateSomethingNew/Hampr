@@ -9,13 +9,11 @@ class DayScreen extends React.Component {
 
   constructor(props) {
     super(props);
-    let addingOutfit = false;
+    let schedulingOutfit = false;
     let refresh = false;
     let params = this.props.navigation.state.params;
-    this.state = { addingOutfit, refresh, ...params };
+    this.state = { schedulingOutfit, refresh, ...params };
     this.state.date = this.state.date || null;
-    this.state.outfits = this.state.outfits || {};
-    this.state.garments = this.state.garments || {};
     this.state.dayOutfits = this.state.dayOutfits || [];
     this.state.markDates = this.state.markDates || (() => {});
   }
@@ -28,19 +26,31 @@ class DayScreen extends React.Component {
     this.setState({ refresh: !this.state.refresh });
   }
 
-  handleRemovePress(outfit, index) {
+  unscheduleOutfit(outfit, index) {
     outfit.dates = outfit.dates.filter(date => date != this.state.date);
     this.state.dayOutfits.splice(index, 1);
     this.state.markDates();
     this.refresh();
   }
 
+  scheduleOutfit(outfit) {
+    let date = this.state.date;
+    if (!outfit.dates.includes(date)) {
+      outfit.dates.push(date);
+      this.state.dayOutfits.push(outfit);
+      this.state.markDates();
+    }
+    this.setState({ schedulingOutfit: false });
+  }
+
   renderGridTile(outfit, index) {
     let navigation = this.props.navigation;
-    //let childProps = { outfit, ...this.state };
+    let childProps = { outfit };
     return (
       <View style={styles.gridTile}>
-      <TouchableWithoutFeedback>
+      <TouchableWithoutFeedback
+        onPress={() => navigation.push('Outfit', childProps)}>
+      <View>
       <Menu>
         <Image
           style={styles.gridThumbnail}
@@ -60,12 +70,13 @@ class DayScreen extends React.Component {
         <MenuOptions
           customStyles={{optionsContainer: styles.menuOptions}}>
             <MenuOption
-              onSelect={() => { this.handleRemovePress(outfit, index) }}
-              children=<Text style={styles.menuText}>Remove</Text>
+              onSelect={() => { this.unscheduleOutfit(outfit, index) }}
+              children=<Text style={styles.menuText}>Unschedule</Text>
             />
         </MenuOptions>
         <Text style={styles.gridText}>{outfit.name}</Text>
       </Menu>
+      </View>
       </TouchableWithoutFeedback>
       </View>
     );
@@ -74,7 +85,7 @@ class DayScreen extends React.Component {
   renderModalGridTile(outfit, index) {
     return (
       <View style={styles.gridTile}>
-      <TouchableWithoutFeedback>
+      <TouchableWithoutFeedback onPress={this.scheduleOutfit.bind(this, outfit)}>
       <View>
         <Image
           style={styles.gridThumbnail}
@@ -96,25 +107,25 @@ class DayScreen extends React.Component {
         underlayColor='transparent' type='ionicon' color='white'
         hitSlop={{right: 30, top: 10, bottom: 10}} />
 
-    AddButton =
+    ScheduleButton =
       <Icon
         name='ios-add'
         type='ionicon'
         color='white'
         underlayColor='transparent'
-        onPress={() => this.setState({ addingOutfit: true })}
+        onPress={() => this.setState({ schedulingOutfit: true })}
         hitSlop={{left: 30, top: 10, bottom: 10}} />
 
-    AddModal =
+    ScheduleModal =
       <Modal
-        isVisible={this.state.addingOutfit}
+        isVisible={this.state.schedulingOutfit}
         animationInTime={600}
-        onBackdropPress={() => this.setState({ addingOutfit: false })}>
+        onBackdropPress={() => this.setState({ schedulingOutfit: false })}>
         <View style={styles.modal}>
           <Header containerStyle={styles.modalHeader}>
             <Icon
               name='ios-close'
-              onPress={() => this.setState({ addingOutfit: false })}
+              onPress={() => this.setState({ schedulingOutfit: false })}
               underlayColor='transparent'
               type='ionicon'
               color='white'
@@ -122,7 +133,7 @@ class DayScreen extends React.Component {
             <Text style={styles.modalTitle}>Outfits</Text>
           </Header>
           <FlatGrid
-            items={Object.values(this.state.outfits)}
+            items={Object.values(global.outfits)}
             itemDimension={130}
             renderItem={({item, index}) => this.renderModalGridTile(item, index)}
             spacing={0} />
@@ -135,7 +146,7 @@ class DayScreen extends React.Component {
         <Header
           leftComponent={BackButton}
           centerComponent={Title}
-          rightComponent={AddButton} />
+          rightComponent={ScheduleButton} />
 
         <FlatGrid
           items={this.state.dayOutfits}
@@ -143,7 +154,7 @@ class DayScreen extends React.Component {
           renderItem={({item, index}) => this.renderGridTile(item, index)}
           spacing={0}/>
 
-        {AddModal}
+        {ScheduleModal}
 
       </View>
     );
@@ -188,10 +199,9 @@ const styles = StyleSheet.create({
 
   },
   modal: {
-    height: 300,
+    height: 500,
     backgroundColor: 'white',
     flexDirection: 'column',
-    alignItems: 'center'
   },
   modalHeader: {
     paddingTop: -20,

@@ -16,8 +16,6 @@ class CalendarScreen extends React.Component {
     let params = this.props.navigation.state.params;
     this.state = { markedDates, selectedDate, refresh, dayModalOutfits,
       ...params };
-    this.state.outfits = this.state.outfits || {};
-    this.state.garments = this.state.garments || {};
   }
 
   componentDidMount() {
@@ -32,7 +30,7 @@ class CalendarScreen extends React.Component {
   markDates() {
     let markedDates = {}
     let selectedDate = this.state.selectedDate;
-    Object.values(this.state.outfits)
+    Object.values(global.outfits)
       .forEach(outfit => outfit.dates.forEach(date => {
         let key = outfit.id;
         let dot = { key, ...dotStyle }
@@ -47,7 +45,7 @@ class CalendarScreen extends React.Component {
   }
 
   getDayOutfits(date) {
-    let outfits = this.state.outfits;
+    let outfits = global.outfits;
     let markedDates = this.state.markedDates;
     return date in markedDates && 'dots' in markedDates[date] ?
       markedDates[date].dots.map(dot => outfits[dot.key]) : [];
@@ -56,21 +54,19 @@ class CalendarScreen extends React.Component {
   handleSavePress() {
     let id = this.state.outfit.id;
     let date = this.state.selectedDate;
-    let dates = this.state.outfits[id].dates;
+    let dates = global.outfits[id].dates;
     if (!dates.includes(date)) {
-      this.state.outfits[id].dates.push(date);
+      global.outfits[id].dates.push(date);
     }
     this.props.navigation.goBack();
   }
 
   navigateToDay(day) {
     let date = day.dateString;
-    let outfits = this.state.outfits;
-    let garments = this.state.garments;
     let dayOutfits = this.getDayOutfits(date);
     let markDates = this.markDates.bind(this);
-    let childProps = { date, outfits, garments, dayOutfits, markDates };
-    this.props.navigation.navigate('Day', childProps);
+    let childProps = { date, dayOutfits, markDates };
+    this.props.navigation.push('Day', childProps);
   }
 
   handleDayPress(day) {
@@ -92,8 +88,6 @@ class CalendarScreen extends React.Component {
 
   handleDayLongPress(day) {
     this.setState({ dayModalOutfits: this.getDayOutfits(day.dateString) });
-    console.log("day long press");
-    console.log(this.state.dayModalVisible);
   }
 
   renderModalGridTile(outfit) {
@@ -203,7 +197,6 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    alignItems: 'center'
   },
   saveButton: {
     position: 'absolute',
@@ -237,7 +230,6 @@ const styles = StyleSheet.create({
     height: 300,
     backgroundColor: 'white',
     flexDirection: 'column',
-    alignItems: 'center'
   },
   modalHeader: {
     paddingTop: -20,
