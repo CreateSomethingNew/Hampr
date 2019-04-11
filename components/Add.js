@@ -8,6 +8,7 @@ import Menu, { MenuProvider, MenuOptions,
 // TODO:
 // - provide data source of all garments
 // - scrape existing types/tags from data source
+// - camera access
 
 const styles = {
   title: {
@@ -246,13 +247,13 @@ class AddScreen extends React.Component {
           />
           <SelectOrEnter
             mode={this.Modes.TYPE}
-            existings={['pants', 'shirts', 'poop']}
+            existings={['pants', 'shirts', 'jackets']}
             actives={this.state.types}
             alterParent={this.getChildState.bind(this)}
           />
           <SelectOrEnter
             mode={this.Modes.TAG}
-            existings={['denim', 'formal', 'poop']}
+            existings={['formal', 'casual', 'denim']}
             actives={this.state.tags}
             alterParent={this.getChildState.bind(this)}
           />
