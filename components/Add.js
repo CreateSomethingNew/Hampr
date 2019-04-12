@@ -190,12 +190,76 @@ class AddScreen extends React.Component {
       types: types,
       tags: tags,
       imageUri: imageUri,
+      id: -1,
     };
   }
 
   willFocus = this.props.navigation.addListener(
     'willFocus',
     () => {
+      item = this.props.navigation.getParam('item', null);
+      if(item !== null) {
+        this.setState({
+          title: item.name,
+          brand: item.brand,
+          types: item.types,
+          tags: item.tags,
+          imageUri: item.src,
+          id: item.id,
+        })
+      }
+      else {
+        this.setState({
+          title: '',
+          brand: '',
+          types: [],
+          tags: [],
+          imageUri: '',
+          id: null,
+        });
+      }
+    }
+  );
+
+  handleSubmit = () => {
+    if(this.state.id !== null) {
+      garmentObj = {};
+      garmentObj['name'] = this.state.title;
+      garmentObj['brand'] = this.state.brand;
+      garmentObj['types'] = this.state.types;
+      garmentObj['tags'] = this.state.tags;
+      garmentObj['id'] = this.state.id;
+      garmentObj['src'] = this.state.imageUri;
+
+      //do a back end calls
+      garments[this.state.id] = garmentObj;
+
+      this.props.navigation.navigate('Clothing');
+    }
+    else {
+      allKeys = Object.keys(garments);
+      max = -1
+      allKeys.forEach(function(key) {
+        if(parseInt(key) > max) {
+          max = parseInt(key);
+        }
+      });
+      garmentObj = {}
+      garmentObj['name'] = this.state.title;
+      garmentObj['brand'] = this.state.brand;
+      garmentObj['types'] = this.state.types;
+      garmentObj['tags'] = this.state.tags;
+      garmentObj['id'] = max + 1;
+      if(this.state.imageUri === '') {
+        garmentObj['src'] = 'http://placehold.it/200x200';
+      }
+      else {
+        garmentObj['src'] = this.state.imageUri;
+      }
+
+      //do a back end call
+
+      garments[max + 1] = garmentObj;
       this.setState({
         title: '',
         brand: '',
@@ -204,39 +268,6 @@ class AddScreen extends React.Component {
         imageUri: '',
       });
     }
-  );
-
-  handleSubmit = () => {
-    allKeys = Object.keys(garments);
-    max = -1
-    allKeys.forEach(function(key) {
-      if(parseInt(key) > max) {
-        max = parseInt(key);
-      }
-    });
-    garmentObj = {}
-    garmentObj['name'] = this.state.title;
-    garmentObj['brand'] = this.state.brand;
-    garmentObj['types'] = this.state.types;
-    garmentObj['tags'] = this.state.tags;
-    garmentObj['id'] = max + 1;
-    if(this.state.imageUri === '') {
-      garmentObj['src'] = 'http://placehold.it/200x200';
-    }
-    else {
-      garmentObj['src'] = this.state.imageUri;
-    }
-
-    //do a back end call
-
-    garments[max + 1] = garmentObj;
-    this.setState({
-      title: '',
-      brand: '',
-      types: [],
-      tags: [],
-      imageUri: '',
-    });
   }
 
   Modes = Object.freeze({
@@ -332,8 +363,14 @@ class AddScreen extends React.Component {
     return typeList;
   }
 
+  navigateBack = () => {
+    this.props.navigation.goBack();
+  }
+
   render() {
     title = <Text style={styles.title}>Add Garment</Text>
+
+    editTitle = <Text style={styles.title}>Edit Garment</Text>
 
     photo = <View style={{ flex: 1, justifyContent: 'center' }}>
           <Icon
@@ -347,11 +384,14 @@ class AddScreen extends React.Component {
     img = <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <TouchableWithoutFeedback onPress={() => this.showPicker()}>
               <Image
-                style={{width: 120, height: 90}}
+                style={{width: 120, height: 120}}
                 source={{uri: this.state.imageUri}}
               />
             </TouchableWithoutFeedback>
           </View>
+
+    backIcon = <Icon name='arrow-back' color='#fff'
+                  onPress={() => this.navigateBack()} underlayColor='transparent' />
 
     existingTags = this.getExistingTags();
     existingTypes = this.getExistingTypes();
@@ -359,7 +399,8 @@ class AddScreen extends React.Component {
     return (
       <View style={{ flex: 1 }}>
         <Header
-          centerComponent={title}
+          leftComponent={this.state.id === null ? null : backIcon}
+          centerComponent={this.state.id === null ? title : editTitle}
         />
         { this.state.imageUri === '' ? photo : img }
         <View style={{ flex: 3, justifyContent: 'left' }}>
@@ -392,7 +433,7 @@ class AddScreen extends React.Component {
         </View>
         <View>
           <Button
-            title='Submit'
+            title={this.state.id === null ? 'Submit' : 'Save'}
             onPress={this.handleSubmit}
           />
         </View>

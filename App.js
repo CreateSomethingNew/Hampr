@@ -7,7 +7,6 @@ import SettingsScreen from './components/Settings.js';
 import AddScreen from './components/Add.js';
 import ClosetScreen from './components/Closet.js';
 import WardrobeScreen from './components/Wardrobe.js';
-import ClothingItemScreen from './components/ClothingItem.js';
 import OutfitScreen from './components/Outfit.js';
 import CalendarScreen from './components/Calendar.js';
 import DayScreen from './components/Day.js';
@@ -41,7 +40,7 @@ const ClothingStack = createStackNavigator(
     	screen: ClosetScreen
     },
     ClothingItem: {
-    	screen: ClothingItemScreen
+    	screen: AddScreen
     },
     Outfit: {
     	screen: ClosetScreen

@@ -76,7 +76,9 @@ class ClosetScreen extends React.Component {
   }
 
 	GetSectionListItem = (navigate, item) => {
-      navigate('ClothingItem');
+      navigate('ClothingItem', {
+        item: item
+      });
   };
 
   switchHighLight = (item) => {
