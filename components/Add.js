@@ -384,7 +384,7 @@ class AddScreen extends React.Component {
     img = <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <TouchableWithoutFeedback onPress={() => this.showPicker()}>
               <Image
-                style={{width: 120, height: 120}}
+                style={{width: 80, height: 80}}
                 source={{uri: this.state.imageUri}}
               />
             </TouchableWithoutFeedback>
@@ -392,6 +392,13 @@ class AddScreen extends React.Component {
 
     backIcon = <Icon name='arrow-back' color='#fff'
                   onPress={() => this.navigateBack()} underlayColor='transparent' />
+
+    deleteButton = <Button
+            title={'Delete'}
+            onPress={this.handleSubmit}
+          />
+
+    spacing = <View style={{width: 50, height: 0, backgroundColor: 'white'}} />
 
     existingTags = this.getExistingTags();
     existingTypes = this.getExistingTypes();
@@ -431,11 +438,13 @@ class AddScreen extends React.Component {
             alterParent={this.getChildState.bind(this)}
           />
         </View>
-        <View>
+        <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
           <Button
             title={this.state.id === null ? 'Submit' : 'Save'}
             onPress={this.handleSubmit}
           />
+          {this.state.id === null ? null : spacing}
+          {this.state.id === null ? null : deleteButton}
         </View>
       </View>
     );
