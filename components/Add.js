@@ -193,6 +193,19 @@ class AddScreen extends React.Component {
     };
   }
 
+  willFocus = this.props.navigation.addListener(
+    'willFocus',
+    () => {
+      this.setState({
+        title: '',
+        brand: '',
+        types: [],
+        tags: [],
+        imageUri: '',
+      });
+    }
+  );
+
   handleSubmit = () => {
     allKeys = Object.keys(garments);
     max = -1
@@ -266,7 +279,7 @@ class AddScreen extends React.Component {
   async pickImage() {
     let result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
-      aspect: [4, 3],
+      aspect: [1, 1],
       base64: true
     });
 

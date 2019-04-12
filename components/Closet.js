@@ -14,7 +14,7 @@ class ClosetScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = { curTags: [], curType: 'All', dataSource: [], 
-                   refresh: false, modalVisible: false, outFitName: ""};
+                   refresh: false, modalVisible: false, outFitName: "", imageUri: ""};
   }
 
   componentDidMount() {
@@ -61,7 +61,7 @@ class ClosetScreen extends React.Component {
         })
         this.setState({
           curTags: [], curType: 'All', dataSource: garments, 
-          refresh: false, modalVisible: false, outFitName: "",
+          refresh: false, modalVisible: false, outFitName: "", imageUri: ""
         });
       }
     }
@@ -420,6 +420,33 @@ class ClosetScreen extends React.Component {
   }
 
   saveOutfit = (navigate) => {
+    allKeys = Object.keys(outfits);
+    max = -1
+    allKeys.forEach(function(key) {
+      if(parseInt(key) > max) {
+        max = parseInt(key);
+      }
+    });
+    outfitObj = {};
+    outfitObj['name'] = this.state.outFitName;
+    outfitObj['dates'] = [];
+    outfitObj['id'] = max + 1;
+    if(this.state.imageUri === '') {
+      outfitObj['src'] = 'http://placehold.it/200x200';
+    }
+    else {
+      outfitObj['src'] = this.state.imageUri;
+    }
+    garmentsList = []
+    Object.values(this.state.dataSource).forEach(function(item) {
+      if(item.highlight === true) {
+        garmentsList.push(item.id);
+      }
+    });
+    outfitObj['garments'] = garmentsList;
+
+    outfits[max + 1] = outfitObj;
+    
     navigate('Clothing', { repoll: true });
   }
 
@@ -445,7 +472,7 @@ class ClosetScreen extends React.Component {
           { this.renderHeader(state, this.state) }
           { state.routeName === "Clothing" || state.routeName === "Select" ? typeFilter : null }
           <Modal isVisible={this.state.modalVisible} animationInTime={600}
-                 onBackdropPress={() => this.setState({modalVisible: false})}>
+                 onBackdropPress={() => this.setState({modalVisible: false, imageUri: ""})}>
             <View style={{ height: 270, backgroundColor: 'white', flexDirection: 'column',
                            alignItems: 'center' }}>
               <Text style={{ fontSize: 18, fontWeight: 'bold', paddingTop: 20 }}>
