@@ -221,6 +221,20 @@ class AddScreen extends React.Component {
     }
   );
 
+  deleteItem = () => {
+    //back end call
+
+    delete garments[this.state.id];
+
+    let something = this;
+
+    Object.values(outfits).forEach(function(outfit) {
+      outfit.garments = outfit.garments.filter(v => v !== something.state.id);
+    });
+
+    this.props.navigation.goBack(); 
+  }
+
   handleSubmit = () => {
     if(this.state.id !== null) {
       garmentObj = {};
@@ -395,7 +409,7 @@ class AddScreen extends React.Component {
 
     deleteButton = <Button
             title={'Delete'}
-            onPress={this.handleSubmit}
+            onPress={this.deleteItem}
           />
 
     spacing = <View style={{width: 50, height: 0, backgroundColor: 'white'}} />
