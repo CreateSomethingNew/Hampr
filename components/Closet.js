@@ -8,6 +8,7 @@ import { FlatGrid } from 'react-native-super-grid';
 import Menu, { MenuOptions,
          MenuOption, MenuTrigger } from 'react-native-popup-menu';
 import Modal from 'react-native-modal';
+import { ImagePicker, Permissions } from 'expo';
 
 class ClosetScreen extends React.Component {
 
@@ -450,22 +451,76 @@ class ClosetScreen extends React.Component {
     navigate('Clothing', { repoll: true });
   }
 
+  showPicker = () => {
+    curThis = this;
+    this.getCameraAsync()
+    .then(curThis.getRollAsync().
+        then(curThis.pickImage()));
+  }
+
+  async pickImage() {
+    let result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      base64: true
+    });
+
+    if(!result.cancelled) {
+      this.setState({ imageUri : result.uri })
+    }
+  }
+
+  async getCameraAsync() {
+    const { Permissions } = Expo;
+    const { status, permissions } = await Permissions.askAsync(Permissions.CAMERA);
+    if (status === 'granted') {
+      return "grant";
+    } else {
+      return "not grant";
+    }
+  }
+
+  async getRollAsync() {
+    const { Permissions } = Expo;
+    const { status, permissions } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+    if (status === 'granted') {
+      return "grant";
+    } else {
+      return "not grant";
+    }
+  }
+
   render() {
     const { navigate } = this.props.navigation;
     const { state } = this.props.navigation;
+
     const typeFilter = <View style={{  height: 40 }}>
                         <ScrollView style={{ backgroundColor: "#dcdcdc" }}
                       horizontal={true} >
                       { this.createScrollButtons() }
                       </ScrollView>
                       </View>;
+                      
     const numItemsHighlight = this.getNumHighlight(this.state.dataSource);
+
     const addToCart = <TouchableWithoutFeedback onPress={this.EnterOutfitScreen.bind(this)}>
                         <View style={{ height: 50, backgroundColor: 'green',
                                      justifyContent: 'center', alignItems: 'center' }}>
                         <Text >Add {numItemsHighlight} to cart</Text>
                         </View>
                       </TouchableWithoutFeedback>;
+
+    modalImage = <Icon name='image' underlayColor='transparent' size={120} 
+                onPress={() => this.showPicker()}/>
+
+    img = <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <TouchableWithoutFeedback onPress={() => this.showPicker()}>
+              <Image
+                style={{width: 120, height: 90}}
+                source={{uri: this.state.imageUri}}
+              />
+            </TouchableWithoutFeedback>
+          </View>
 
     return (
         <View style={styles.container}>
@@ -478,7 +533,7 @@ class ClosetScreen extends React.Component {
               <Text style={{ fontSize: 18, fontWeight: 'bold', paddingTop: 20 }}>
                 Add Image
               </Text>
-              <Icon name='image' underlayColor='transparent' size={120} />
+              { this.state.imageUri === '' ? modalImage : img }
               <Text style={{ fontSize: 18, fontWeight: 'bold', paddingTop: 0 }}>
                 Enter Name
               </Text>
