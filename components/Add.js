@@ -1,5 +1,6 @@
 import React from 'react';
-import { Button, FlatList, Form, Image, Picker, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Button, FlatList, Form, Image, Picker, ScrollView, StyleSheet, Text, TextInput, 
+  TouchableWithoutFeedback, View } from 'react-native';
 import { Header, Icon, ListItem } from 'react-native-elements';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Menu, { MenuProvider, MenuOptions,
@@ -40,6 +41,14 @@ class SelectOrEnter extends React.Component {
       existings: this.props.existings,
     };
     this.parentActives = props.actives;
+  }
+
+  componentWillReceiveProps(props) {
+    this.setState({
+      actives: props.actives,
+      inactives: this.getInactives(props.existings, props.actives),
+      existings: this.props.existings,
+    });  
   }
 
   getInactives = (existings, actives) => {
@@ -182,11 +191,39 @@ class AddScreen extends React.Component {
       tags: tags,
       imageUri: imageUri,
     };
-    console.log(this.state);
   }
 
   handleSubmit = () => {
-    console.log(this.state);
+    allKeys = Object.keys(garments);
+    max = -1
+    allKeys.forEach(function(key) {
+      if(parseInt(key) > max) {
+        max = parseInt(key);
+      }
+    });
+    garmentObj = {}
+    garmentObj['name'] = this.state.title;
+    garmentObj['brand'] = this.state.brand;
+    garmentObj['types'] = this.state.types;
+    garmentObj['tags'] = this.state.tags;
+    garmentObj['id'] = max + 1;
+    if(this.state.imageUri === '') {
+      garmentObj['src'] = 'http://placehold.it/200x200';
+    }
+    else {
+      garmentObj['src'] = this.state.imageUri;
+    }
+
+    //do a back end call
+
+    garments[max + 1] = garmentObj;
+    this.setState({
+      title: '',
+      brand: '',
+      types: [],
+      tags: [],
+      imageUri: '',
+    });
   }
 
   Modes = Object.freeze({
@@ -220,7 +257,6 @@ class AddScreen extends React.Component {
   }
 
   showPicker = () => {
-    console.log("first");
     curThis = this;
     this.getCameraAsync()
     .then(curThis.getRollAsync().
@@ -233,8 +269,6 @@ class AddScreen extends React.Component {
       aspect: [4, 3],
       base64: true
     });
-
-    console.log(result);
 
     if(!result.cancelled) {
       this.setState({ imageUri : result.uri })
@@ -261,6 +295,30 @@ class AddScreen extends React.Component {
     }
   }
 
+  getExistingTags = () => {
+    tagList = []
+    Object.values(garments).forEach(function(item) {
+      item.tags.forEach(function(tag) {
+        if(!tagList.includes(tag)) {
+          tagList.push(tag);
+        }
+      });
+    });
+    return tagList;
+  }
+
+  getExistingTypes = () => {
+    typeList = []
+    Object.values(garments).forEach(function(item) {
+      item.types.forEach(function(type) {
+        if(!typeList.includes(type)) {
+          typeList.push(type);
+        }
+      });
+    });
+    return typeList;
+  }
+
   render() {
     title = <Text style={styles.title}>Add Garment</Text>
 
@@ -274,11 +332,16 @@ class AddScreen extends React.Component {
           </View>
 
     img = <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Image
-              style={{width: 120, height: 90}}
-              source={{uri: this.state.imageUri}}
-            />
+            <TouchableWithoutFeedback onPress={() => this.showPicker()}>
+              <Image
+                style={{width: 120, height: 90}}
+                source={{uri: this.state.imageUri}}
+              />
+            </TouchableWithoutFeedback>
           </View>
+
+    existingTags = this.getExistingTags();
+    existingTypes = this.getExistingTypes();
 
     return (
       <View style={{ flex: 1 }}>
@@ -292,22 +355,24 @@ class AddScreen extends React.Component {
             editable={true}
             placeholder={'Garment Name'}
             onChangeText={(text) => this.setState({title: text})}
+            value={this.state.title}
           />
           <TextInput
             style={styles.textInput}
             editable={true}
             placeholder='Garment Brand'
             onChangeText={(text) => this.setState({brand: text})}
+            value={this.state.brand}
           />
           <SelectOrEnter
             mode={this.Modes.TYPE}
-            existings={['pants', 'shirts', 'poop']}
+            existings={existingTypes}
             actives={this.state.types}
             alterParent={this.getChildState.bind(this)}
           />
           <SelectOrEnter
             mode={this.Modes.TAG}
-            existings={['denim', 'formal', 'poop']}
+            existings={existingTags}
             actives={this.state.tags}
             alterParent={this.getChildState.bind(this)}
           />

@@ -44,6 +44,11 @@ class ClosetScreen extends React.Component {
       if(this.props.navigation.getParam('repoll', null) === null) {
       	const curTags = this.props.navigation.getParam('curTags', []);
     		const curType = this.props.navigation.getParam('curType', "All");
+        Object.values(garments).forEach(function(item) {
+          if(!('highlight' in item)) {
+            item.highlight = false;
+          }
+        })
     		this.setState({
         	curTags: curTags,
         	curType: curType,
@@ -183,9 +188,11 @@ class ClosetScreen extends React.Component {
       return b[1] - a[1];
     });
 
+    let something = this;
+
     for (let i = 0; i < sortList.length; i++) {
       inactiveTagComponentList.push(<MenuOption
-        key={this.genUniqueID()} onSelect={() => this.AddTag(sortList[i][0], globalState)} children=
+        key={something.genUniqueID()} onSelect={() => this.AddTag(sortList[i][0], globalState)} children=
       <View>
         <Text>{sortList[i][0]}</Text>
         <Icon name='plus' type='entypo' color='#000000' underlayColor='transparent'
@@ -199,7 +206,7 @@ class ClosetScreen extends React.Component {
     tagComponentList = [];
     let something = this;
     globalState.curTags.forEach(function(name) {
-      tagComponentList.push(<MenuOption key={this.genUniqueID()} onSelect={() => something.RemoveTag(name, globalState)}
+      tagComponentList.push(<MenuOption key={something.genUniqueID()} onSelect={() => something.RemoveTag(name, globalState)}
        children=
       <View>
         <Text>{name}</Text>

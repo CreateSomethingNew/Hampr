@@ -39,21 +39,24 @@ GetGarments = () => {
       name: 'Garment 0',
       src: 'http://placehold.it/200x200?text=Garment_0',
       types: ['Type A'],
-      tags: ['Tag A', 'Tag B']
+      tags: ['Tag A', 'Tag B'],
+      brand: "Gucci"
     },
     1: {
       id: 1,
       name: 'Garment 1',
       src: 'http://placehold.it/200x200?text=Garment_1',
       types: ['Type B', 'Type C'],
-      tags: ['Tag C']
+      tags: ['Tag C'],
+      brand: "Tricks"
     },
     2: {
       id: 2,
       name: 'Garment 2',
       src: 'http://placehold.it/200x200?text=Garment_2',
       types: ['Type C'],
-      tags: ['Tag A']
+      tags: ['Tag A'],
+      brand: "Blud"
     }
   };
   return Promise.resolve(data);
