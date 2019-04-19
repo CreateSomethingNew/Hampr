@@ -127,6 +127,6 @@ export default class App extends React.Component {
   }
 
   render() {
-    return this.state.ready ? this.renderApp() : this.renderSplash();
+    return this.renderSplash();
   }
 }
