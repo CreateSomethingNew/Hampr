@@ -62,12 +62,24 @@ GetGarments = () => {
   return Promise.resolve(data);
 }
 
+GetScore = () => {
+  let score = .35;
+  return Promise.resolve(score);
+}
+
+GetTrending = () => {
+  let trending = "dogs";
+  return Promise.resolve(trending);
+}
+
 export default function GetData() {
   console.log("Loading...")
-  return Promise.all([ GetOutfits(), GetGarments() ])
+  return Promise.all([ GetOutfits(), GetGarments(), GetScore(), GetTrending() ])
     .then(data => {
       global.outfits = data[0];
       global.garments = data[1];
+      global.score = data[2];
+      global.trending = data[3];
       console.log("Done");
     });
 }

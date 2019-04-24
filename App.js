@@ -11,6 +11,7 @@ import OutfitScreen from './components/Outfit.js';
 import CalendarScreen from './components/Calendar.js';
 import DayScreen from './components/Day.js';
 import SplashScreen from './components/Splash.js';
+import LoadingScreen from './components/Loading.js';
 import { MenuProvider } from 'react-native-popup-menu';
 import GetData from './Api.js';
 
@@ -104,18 +105,31 @@ const AppContainer = createAppContainer(TabNav);
 export default class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { ready: false };
+    this.state = { ready: false, loggedIn: false };
   }
 
-  componentDidMount() {
+  logIn() {
+    console.log("hi");
+    this.setState({loggedIn : true});
     GetData()
       .then(() => {
         this.setState({ ready: true });
       });
   }
 
+  componentDidMount() {
+    //GetData()
+      //.then(() => {
+        //this.setState({ ready: true });
+    //});
+  }
+
+  renderLoading() {
+    return <LoadingScreen/>;
+  }
+
   renderSplash() {
-    return <SplashScreen/>;
+    return <SplashScreen logIn = {this.logIn.bind(this)}/>;
   }
 
   renderApp() {
@@ -127,6 +141,8 @@ export default class App extends React.Component {
   }
 
   render() {
-    return this.renderSplash();
+    console.log(this.state.ready);
+    return this.state.ready ? this.renderApp() : (this.state.loggedIn ? this.renderLoading() : this.renderSplash());
+    //return this.state.ready ? this.renderApp() : this.renderLoading();
   }
 }
