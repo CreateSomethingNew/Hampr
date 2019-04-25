@@ -40,8 +40,15 @@ class SplashScreen extends React.Component {
     constructor(props) {
         super(props);
         retrieveData().then(function(resp) {
-          //hit the mange
-          console.log(resp);
+          fetch('http://' + serverUrl + ':8080/auth/login', {
+            method: 'GET',
+            headers: {
+              "authId": resp[0],
+              "token": resp[1]
+            },
+          }).then(function(response) {
+            console.log(response);
+          });
         })
     }
 
