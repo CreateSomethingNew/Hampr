@@ -26,11 +26,10 @@ const getObject= function (str) {
     } catch (error) {
         false
     }
-    
+
 }
 
 restart = (that) => {
-  console.log(that);
   that.forceUpdate();
 }
 
@@ -41,7 +40,7 @@ class SplashScreen extends React.Component {
         super(props);
 
         retrieveData().then(function(resp) {
-          fetch('http://' + serverUrl + ':8080/auth/login', {
+          fetch('http://' + serverUrl + ':8080/api/login', {
             method: 'GET',
             headers: {
               "authId": resp[0],
@@ -50,7 +49,7 @@ class SplashScreen extends React.Component {
           }).then(function(response) {
             if(!(response.ok))
               throw new Error();
-            this.props.logIn();
+            props.logIn();
           })
           .catch(function() {
             throw new Error();
@@ -94,8 +93,8 @@ class SplashScreen extends React.Component {
           <View style={{flex:11}}>
             <WebView ref={(wv) => { this.webView = wv; }}
               source={{ uri: 'https://createsomethingnew.github.io/' }}
-              injectedJavaScript={patchPostMessageJsCode} 
-              onMessage={m => this.onMessage(m, that)}  
+              injectedJavaScript={patchPostMessageJsCode}
+              onMessage={m => this.onMessage(m, that)}
               pointerEvents={"none"}
               style={styles.webView}
               useWebKit={true}
@@ -120,4 +119,3 @@ const styles = StyleSheet.create({
 });
 
 export default SplashScreen;
-
