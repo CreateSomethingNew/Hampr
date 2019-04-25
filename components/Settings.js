@@ -104,74 +104,12 @@ class SettingsScreen extends React.Component {
     const mismatchPw = <Text style={{ fontSize: 18, fontWeight: 'bold', paddingTop: 0, color: 'red' }}>
                         Passwords Mismatch
                       </Text>;
-    console.log(this.state);
 
     return (
       <View style={styles.container}>
         <Header
            centerComponent={{ text: 'Settings', style: { color: '#fff', fontSize: 20 } }}
          />
-         <Modal isVisible={this.state.emailVis} animationInTime={600}
-                 onBackdropPress={() => this.setState({emailVis: false})}>
-            <View style={{ height: 270, backgroundColor: 'white', flexDirection: 'column',
-                           alignItems: 'center' }}>
-              <Text style={{ fontSize: 18, fontWeight: 'bold', paddingTop: 20, paddingBottom: 20 }}>
-                Old email is {this.state.email}
-              </Text>
-              <Text style={{ fontSize: 18, fontWeight: 'bold'}}>
-                Enter New Email
-              </Text>
-              <TextInput
-                style={{height: 40, width: 200, borderColor: 'gray', borderWidth: 1, marginBottom: 20 }}
-                onChangeText={(newEmail) => this.setState({newEmail})}
-                value={this.state.newEmail}
-              />
-              <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-                Confirm New Email
-              </Text>
-              <TextInput
-                style={{height: 40, width: 200, borderColor: 'gray', borderWidth: 1}}
-                onChangeText={(confirmEmail) => this.setState({confirmEmail})}
-                value={this.state.confirmEmail}
-              />
-              { this.state.mismatch ? mismatch : null }
-              <Button
-                style={{ paddingTop: 40 }}
-                title="Save"
-                color="#841584"
-                onPress={this.changeEmail.bind(this)}
-              />
-            </View>
-          </Modal>
-          <Modal isVisible={this.state.pwVis} animationInTime={600}
-                 onBackdropPress={() => this.setState({pwVis: false})}>
-            <View style={{ height: 230, backgroundColor: 'white', flexDirection: 'column',
-                           alignItems: 'center' }}>
-              <Text style={{ fontSize: 18, fontWeight: 'bold', paddingTop: 20}}>
-                Enter New Password
-              </Text>
-              <TextInput
-                style={{height: 40, width: 200, borderColor: 'gray', borderWidth: 1, marginBottom: 20 }}
-                onChangeText={(newPw) => this.setState({newPw})}
-                value={this.state.newPw}
-              />
-              <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-                Confirm New Password
-              </Text>
-              <TextInput
-                style={{height: 40, width: 200, borderColor: 'gray', borderWidth: 1}}
-                onChangeText={(confirmPw) => this.setState({confirmPw})}
-                value={this.state.confirmPw}
-              />
-              { this.state.mismatchPw ? mismatchPw : null }
-              <Button
-                style={{ paddingTop: 40 }}
-                title="Save"
-                color="#841584"
-                onPress={this.changePw.bind(this)}
-              />
-            </View>
-          </Modal>
           <Modal isVisible={this.state.dataVis} animationInTime={600}
                  onBackdropPress={() => this.setState({dataVis: false})}>
             <View style={{ height: 100, backgroundColor: 'white', flexDirection: 'column',
@@ -220,7 +158,6 @@ class SettingsScreen extends React.Component {
           </Modal>
          <SectionList
 		       sections={[
-		         { title: 'User Settings', data: ['Change Email', 'Change Password'] },
 		         { title: 'Data Settings', data: ['Delete All Data', 'Delete Account']}
 		       ]}
 		       renderSectionHeader={ ({section}) => 

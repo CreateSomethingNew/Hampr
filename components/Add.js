@@ -231,8 +231,10 @@ class AddScreen extends React.Component {
     Object.values(outfits).forEach(function(outfit) {
       outfit.garments = outfit.garments.filter(v => v !== something.state.id);
     });
-
-    this.props.navigation.goBack(); 
+    
+    this.props.navigation.navigate('Clothing', { repoll: true });
+    //this.props.navigation.state.params.refresh(); 
+    //this.props.navigation.goBack();
   }
 
   handleSubmit = () => {
@@ -248,7 +250,7 @@ class AddScreen extends React.Component {
       //do a back end calls
       garments[this.state.id] = garmentObj;
 
-      this.props.navigation.navigate('Clothing');
+      this.props.navigation.navigate('Clothing', {repoll: true});
     }
     else {
       allKeys = Object.keys(garments);
@@ -308,7 +310,6 @@ class AddScreen extends React.Component {
         state = {tags: actives};
         break;
       default:
-        console.log('Unsupported mode');
         return;
     }
     this.setState(state);

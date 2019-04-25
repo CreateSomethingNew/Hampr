@@ -15,6 +15,8 @@ import LoadingScreen from './components/Loading.js';
 import { MenuProvider } from 'react-native-popup-menu';
 import GetData from './Api.js';
 
+global.serverUrl = "192.168.0.125";
+
 const WardrobeStack = createStackNavigator(
     {
         Wardrobe: WardrobeScreen,
@@ -109,7 +111,6 @@ export default class App extends React.Component {
   }
 
   logIn() {
-    console.log("hi");
     this.setState({loggedIn : true});
     GetData()
       .then(() => {
@@ -118,10 +119,6 @@ export default class App extends React.Component {
   }
 
   componentDidMount() {
-    //GetData()
-      //.then(() => {
-        //this.setState({ ready: true });
-    //});
   }
 
   renderLoading() {
@@ -141,8 +138,6 @@ export default class App extends React.Component {
   }
 
   render() {
-    console.log(this.state.ready);
     return this.state.ready ? this.renderApp() : (this.state.loggedIn ? this.renderLoading() : this.renderSplash());
-    //return this.state.ready ? this.renderApp() : this.renderLoading();
   }
 }

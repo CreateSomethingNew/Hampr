@@ -57,6 +57,7 @@ class ClosetScreen extends React.Component {
         return;
       }
       else {
+        this.props.navigation.setParams({'repoll': null});
         Object.values(garments).forEach(function(item) {
           item.highlight = false;
         })
@@ -149,6 +150,7 @@ class ClosetScreen extends React.Component {
   RemoveTag = (tag, globalState) => {
     let newTags = globalState.curTags;
     newTags = newTags.filter(v => v !== tag);
+    this.props.navigation.setParams({'curTags': newTags});
     this.setState({
       curTags: newTags,
       refresh: !globalState.refresh
@@ -164,10 +166,12 @@ class ClosetScreen extends React.Component {
   AddTag = (tag, globalState) => {
     let newTags = globalState.curTags;
     newTags.push(tag);
+    this.props.navigation.setParams({'curTags': newTags});
     this.setState({
       curTags: newTags,
       refresh: !globalState.refresh
     })
+
   }
 
   InactiveTags = (globalState) => {
@@ -376,6 +380,7 @@ class ClosetScreen extends React.Component {
   }
 
   ChangeFilter = (typeText) => {
+    this.props.navigation.setParams({'curType': typeText});
     this.setState({
       curType: typeText,
       refresh: !this.state.refresh

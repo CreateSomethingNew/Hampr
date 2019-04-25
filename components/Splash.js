@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { StyleSheet, WebView, AsyncStorage } from 'react-native';
+import { StyleSheet, WebView, AsyncStorage, View, Button } from 'react-native';
+import { retrieveData } from '../Util.js'
 
 // The html for the webview can be seen here https://gist.github.com/xpsdeset/72a0ca5b774dfdbc8f60d45dbf379967
 // Needed for fix "Setting onMessage on a WebView overrides existing values of window.postMessage, but a previous value was defined." You get the issue for ios
@@ -28,35 +29,41 @@ const getObject= function (str) {
     
 }
 
+restart = (that) => {
+  console.log(that);
+  that.forceUpdate();
+}
+
 
 class SplashScreen extends React.Component {
 
     constructor(props) {
         super(props);
+        retrieveData().then(function(resp) {
+          //hit the mange
+          console.log(resp);
+        })
     }
 
     onMessage(m, that) {
         var newData = getObject(m.nativeEvent.data);
         if (newData && newData["loggedIn"] === true) {
-          fetch('http://192.168.1.25:8080/auth/code', {
+          console.log("start");
+          fetch('http://' + serverUrl + ':8080/auth/code', {
             method: 'GET',
             headers: {
               "Auth-Code": newData["code"]
             },
           })
           .then(function(response) {
-
             if(!(response.ok)){
               throw new Error();
             }
-            
-            let resp = response.json();
-            AsyncStorage.setItem('authId', resp['id'])
+            return response.json();
+          }).then(function(resp) {
+            AsyncStorage.multiSet([['authId', resp['id']], ['token', resp['access_token']]])
               .then(function() {
-                AsyncStorage.setItem('token', resp['access_token'])
-                  .then(function() {
-                    that.props.logIn();
-                  })
+                that.props.logIn();
               })
           })
           .catch(function() {
@@ -70,14 +77,22 @@ class SplashScreen extends React.Component {
         let that = this;
 
         return (
+          <View style={{flex:11}}>
             <WebView ref={(wv) => { this.webView = wv; }}
-                source={{ uri: 'https://createsomethingnew.github.io/' }}
-                    injectedJavaScript={patchPostMessageJsCode} 
-                    onMessage={m => this.onMessage(m, that)}  
-                    pointerEvents={"none"}
-                    style={styles.webView}
-                    useWebKit={true}
-                    />
+              source={{ uri: 'https://createsomethingnew.github.io/' }}
+              injectedJavaScript={patchPostMessageJsCode} 
+              onMessage={m => this.onMessage(m, that)}  
+              pointerEvents={"none"}
+              style={styles.webView}
+              useWebKit={true}
+            />
+            <Button
+              onPress={() => this.webView.reload()}
+              title="Restart"
+              color="#841584"
+              accessibilityLabel="Learn more about this purple button"
+            />
+          </View>
         );
     }
 }
@@ -85,7 +100,8 @@ class SplashScreen extends React.Component {
 
 const styles = StyleSheet.create({
     webView: {
-        marginTop: 50
+        marginTop: 50,
+        flex:1
     }
 });
 
