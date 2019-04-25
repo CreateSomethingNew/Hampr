@@ -39,6 +39,7 @@ class SplashScreen extends React.Component {
 
     constructor(props) {
         super(props);
+
         retrieveData().then(function(resp) {
           fetch('http://' + serverUrl + ':8080/auth/login', {
             method: 'GET',
@@ -47,8 +48,14 @@ class SplashScreen extends React.Component {
               "token": resp[1]
             },
           }).then(function(response) {
-            console.log(response);
-          });
+            if(!(response.ok))
+              throw new Error();
+            this.props.logIn();
+          })
+          .catch(function() {
+            throw new Error();
+          })
+        }).catch(function() {
         })
     }
 
@@ -64,7 +71,7 @@ class SplashScreen extends React.Component {
           })
           .then(function(response) {
             if(!(response.ok)){
-              throw new Error();
+              that.forceUpdate();
             }
             return response.json();
           }).then(function(resp) {
