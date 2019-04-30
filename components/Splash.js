@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, WebView, AsyncStorage, View, Button } from 'react-native';
-import { retrieveData } from '../Util.js'
+import { retrieveAuthData } from '../Util.js'
 
 // The html for the webview can be seen here https://gist.github.com/xpsdeset/72a0ca5b774dfdbc8f60d45dbf379967
 // Needed for fix "Setting onMessage on a WebView overrides existing values of window.postMessage, but a previous value was defined." You get the issue for ios
@@ -39,7 +39,7 @@ class SplashScreen extends React.Component {
     constructor(props) {
         super(props);
 
-        retrieveData().then(function(resp) {
+        retrieveAuthData().then(function(resp) {
           fetch('http://' + serverUrl + ':8080/api/login', {
             method: 'GET',
             headers: {

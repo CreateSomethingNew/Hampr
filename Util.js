@@ -1,7 +1,7 @@
 import { AsyncStorage } from 'react-native';
 
 
-export function retrieveData() {
+export function retrieveAuthData() {
 	return AsyncStorage.multiGet(['authId', 'token']).then(function(res) {
 		if(res[0][1] === null || res[1][1] === null)
 			throw new Error();
