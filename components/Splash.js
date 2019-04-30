@@ -47,9 +47,11 @@ class SplashScreen extends React.Component {
               "token": resp[1]
             },
           }).then(function(response) {
+            console.log(response);
             if(!(response.ok))
               throw new Error();
-            props.logIn();
+            else
+              props.logIn();
           })
           .catch(function() {
             throw new Error();
