@@ -14,8 +14,6 @@ class HomeScreen extends React.Component {
   }
 
   render() {
-
-
   	Title = <Text style={styles.title}>Home</Text>
 
     return (

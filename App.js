@@ -115,6 +115,9 @@ export default class App extends React.Component {
     GetData()
       .then(() => {
         this.setState({ ready: true });
+      })
+      .catch(() => {
+          console.log("unable to get data");
       });
   }
 

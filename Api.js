@@ -1,4 +1,4 @@
-import { retrieveData } from './Util.js'
+import { retrieveAuthData } from './Util.js'
 
 export default function GetData() {
   console.log("Loading...")
@@ -22,9 +22,9 @@ export default function GetData() {
             return response.json();
         })
         .then(json => {
-            global.outfits = json.data.outfits;
-            global.garments = json.data.garments;
-            global.score = 0.35;
+            global.outfits = json.outfits;
+            global.garments = json.garments;
+            global.score = json.score;
             global.trending = "dogs"
             console.log("Done loading global data.")
 
