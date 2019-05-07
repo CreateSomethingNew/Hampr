@@ -40,29 +40,33 @@ class SplashScreen extends React.Component {
         super(props);
 
         retrieveData().then(function(resp) {
-          fetch('http://' + serverUrl + ':8080/api/login', {
+          console.log("fetching login endpoint")
+          fetch('http://' + global.serverUrl + ':8080/api/user/login', {
             method: 'GET',
             headers: {
               "authId": resp[0],
               "token": resp[1]
             },
           }).then(function(response) {
-            if(!(response.ok))
-              throw new Error();
-            props.logIn();
+              if (response.ok) {
+                  props.logIn();
+              } else {
+                  console.log("not logged in")
+              }
           })
           .catch(function() {
-            throw new Error();
+            console.log("unable to hit login endpoint")
           })
         }).catch(function() {
+            console.log("unable to reach phone storage")
         })
     }
 
     onMessage(m, that) {
         var newData = getObject(m.nativeEvent.data);
         if (newData && newData["loggedIn"] === true) {
-          console.log("start");
-          fetch('http://' + serverUrl + ':8080/auth/code', {
+          console.log("fetching code endpoint");
+          fetch('http://' + global.serverUrl + ':8080/auth/code', {
             method: 'GET',
             headers: {
               "Auth-Code": newData["code"]
@@ -74,6 +78,8 @@ class SplashScreen extends React.Component {
             }
             return response.json();
           }).then(function(resp) {
+            console.log("look")
+            console.log(JSON.stringify(resp))
             AsyncStorage.multiSet([['authId', resp['id']], ['token', resp['access_token']]])
               .then(function() {
                 that.props.logIn();

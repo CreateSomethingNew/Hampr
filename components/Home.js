@@ -10,9 +10,11 @@ class HomeScreen extends React.Component {
   }
 
   componentDidMount() {
+      console.log("global.score", global.score)
   }
-  
+
   render() {
+
 
   	Title = <Text style={styles.title}>Home</Text>
 
