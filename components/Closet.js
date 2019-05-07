@@ -42,7 +42,6 @@ class ClosetScreen extends React.Component {
   willFocus = this.props.navigation.addListener(
     'willFocus',
     () => {
-      console.log(this.props.navigation)
       if(this.props.navigation.getParam('repoll', null) === null) {
       	const curTags = this.props.navigation.getParam('curTags', []);
     		const curType = this.props.navigation.getParam('curType', "All");
@@ -440,7 +439,7 @@ class ClosetScreen extends React.Component {
     outfitObj = {};
     outfitObj['name'] = this.state.outFitName;
     outfitObj['dates'] = [];
-    outfitObj['id'] = max + 1;
+    outfitObj['id'] = (max + 1).toString();
     if(this.state.imageUri === '') {
       outfitObj['src'] = 'http://placehold.it/200x200';
     }
@@ -455,7 +454,7 @@ class ClosetScreen extends React.Component {
     });
     outfitObj['garments'] = garmentsList;
 
-    outfits[max + 1] = outfitObj;
+    outfits[(max + 1).toString()] = outfitObj;
     
     navigate('Clothing', { repoll: true });
   }
@@ -475,7 +474,7 @@ class ClosetScreen extends React.Component {
     });
 
     if(!result.cancelled) {
-      this.setState({ imageUri : result.uri })
+      this.setState({ imageUri : 'data:image/jpg;base64,' + result.base64 })
     }
   }
 

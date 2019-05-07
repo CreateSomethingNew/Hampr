@@ -6,6 +6,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Menu, { MenuProvider, MenuOptions,
          MenuOption, MenuTrigger } from 'react-native-popup-menu';
 import { ImagePicker, Permissions } from 'expo';
+import { retrieveAuthData } from '../Util.js'
 
 // TODO:
 // - provide data source of all garments
@@ -247,10 +248,32 @@ class AddScreen extends React.Component {
       garmentObj['id'] = this.state.id;
       garmentObj['src'] = this.state.imageUri;
 
-      //do a back end calls
-      garments[this.state.id] = garmentObj;
-
-      this.props.navigation.navigate('Clothing', {repoll: true});
+       retrieveAuthData()
+      .then(cookies => {
+        console.log("editing new garment", "cookies", cookies)
+        fetch('http://' + global.serverUrl + ':8080/api/garment/insert', {
+            method: 'POST',
+            headers: {
+                "authId": cookies[0],
+                "token": cookies[1],
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(garmentObj),
+        })
+        .then(response => {
+            if (!response.ok) {
+                console.log("editing garment returned bad response:")
+                console.log(response)
+                throw new Error();
+            }
+            return;
+        })
+        .then(() => {
+        	garments[this.state.id] = garmentObj;
+			this.props.navigation.navigate('Clothing', {repoll: true});
+        })
+        .catch(error => console.log("error editing garment", error));
+  	  });
     }
     else {
       allKeys = Object.keys(garments);
@@ -265,7 +288,7 @@ class AddScreen extends React.Component {
       garmentObj['brand'] = this.state.brand;
       garmentObj['types'] = this.state.types;
       garmentObj['tags'] = this.state.tags;
-      garmentObj['id'] = max + 1;
+      garmentObj['id'] = (max + 1).toString();
       if(this.state.imageUri === '') {
         garmentObj['src'] = 'http://placehold.it/200x200';
       }
@@ -274,17 +297,40 @@ class AddScreen extends React.Component {
       }
 
       //do a back end call
-
-      garments[max + 1] = garmentObj;
-      this.setState({
-        title: '',
-        brand: '',
-        types: [],
-        tags: [],
-        imageUri: '',
-      });
-    }
+      retrieveAuthData()
+      .then(cookies => {
+        console.log("instering new garment", "cookies", cookies)
+        fetch('http://' + global.serverUrl + ':8080/api/garment/insert', {
+            method: 'POST',
+            headers: {
+                "authId": cookies[0],
+                "token": cookies[1],
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(garmentObj),
+        })
+        .then(response => {
+            if (!response.ok) {
+                console.log("insert garment returned bad response:")
+                console.log(response)
+                throw new Error();
+            }
+            return;
+        })
+        .then(() => {
+        	garments[(max + 1).toString()] = garmentObj;
+      		this.setState({
+	        	title: '',
+	        	brand: '',
+	        	types: [],
+	        	tags: [],
+	        	imageUri: ''
+      		});
+        })
+        .catch(error => console.log("error inserting garment", error));
+  	});
   }
+}
 
   Modes = Object.freeze({
     TYPE: {
@@ -326,11 +372,12 @@ class AddScreen extends React.Component {
     let result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
       aspect: [1, 1],
-      base64: true
+      base64: true,
+      quality: 0
     });
 
     if(!result.cancelled) {
-      this.setState({ imageUri : result.uri })
+      this.setState({ imageUri : 'data:image/jpg;base64,' + result.base64 })
     }
   }
 
