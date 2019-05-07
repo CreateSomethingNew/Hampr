@@ -3,10 +3,10 @@ import { retrieveData } from './Util.js'
 export default function GetData() {
   console.log("Loading...")
 
-  return retrieveData()
+  return retrieveAuthData()
     .then(cookies => {
         console.log("fetching user global data", "cookies", cookies)
-        return fetch('http://' + global.serverUrl + ':8080/api/user/find?id=12345', {
+        return fetch('http://' + global.serverUrl + ':8080/api/user/find', {
             method: 'GET',
             headers: {
                 "authId": cookies[0],
