@@ -1,5 +1,6 @@
 import React from 'react';
-import { Button, FlatList, Form, Image, Picker, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Button, FlatList, Form, Image, Picker, ScrollView, StyleSheet, Text, TextInput,
+  TouchableWithoutFeedback, View } from 'react-native';
 import { Header, Icon, ListItem } from 'react-native-elements';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Menu, { MenuProvider, MenuOptions,
@@ -41,6 +42,14 @@ class SelectOrEnter extends React.Component {
       existings: this.props.existings,
     };
     this.parentActives = props.actives;
+  }
+
+  componentWillReceiveProps(props) {
+    this.setState({
+      actives: props.actives,
+      inactives: this.getInactives(props.existings, props.actives),
+      existings: this.props.existings,
+    });
   }
 
   getInactives = (existings, actives) => {
@@ -182,12 +191,100 @@ class AddScreen extends React.Component {
       types: types,
       tags: tags,
       imageUri: imageUri,
+      id: -1,
     };
-    console.log(this.state);
+  }
+
+  willFocus = this.props.navigation.addListener(
+    'willFocus',
+    () => {
+      item = this.props.navigation.getParam('item', null);
+      if(item !== null) {
+        this.setState({
+          title: item.name,
+          brand: item.brand,
+          types: item.types,
+          tags: item.tags,
+          imageUri: item.src,
+          id: item.id,
+        })
+      }
+      else {
+        this.setState({
+          title: '',
+          brand: '',
+          types: [],
+          tags: [],
+          imageUri: '',
+          id: null,
+        });
+      }
+    }
+  );
+
+  deleteItem = () => {
+    //back end call
+
+    delete garments[this.state.id];
+
+    let something = this;
+
+    Object.values(outfits).forEach(function(outfit) {
+      outfit.garments = outfit.garments.filter(v => v !== something.state.id);
+    });
+
+    this.props.navigation.navigate('Clothing', { repoll: true });
+    //this.props.navigation.state.params.refresh();
+    //this.props.navigation.goBack();
   }
 
   handleSubmit = () => {
-    console.log(this.state);
+    if(this.state.id !== null) {
+      garmentObj = {};
+      garmentObj['name'] = this.state.title;
+      garmentObj['brand'] = this.state.brand;
+      garmentObj['types'] = this.state.types;
+      garmentObj['tags'] = this.state.tags;
+      garmentObj['id'] = this.state.id;
+      garmentObj['src'] = this.state.imageUri;
+
+      //do a back end calls
+      garments[this.state.id] = garmentObj;
+
+      this.props.navigation.navigate('Clothing', {repoll: true});
+    }
+    else {
+      allKeys = Object.keys(garments);
+      max = -1
+      allKeys.forEach(function(key) {
+        if(parseInt(key) > max) {
+          max = parseInt(key);
+        }
+      });
+      garmentObj = {}
+      garmentObj['name'] = this.state.title;
+      garmentObj['brand'] = this.state.brand;
+      garmentObj['types'] = this.state.types;
+      garmentObj['tags'] = this.state.tags;
+      garmentObj['id'] = max + 1;
+      if(this.state.imageUri === '') {
+        garmentObj['src'] = 'http://placehold.it/200x200';
+      }
+      else {
+        garmentObj['src'] = this.state.imageUri;
+      }
+
+      //do a back end call
+
+      garments[max + 1] = garmentObj;
+      this.setState({
+        title: '',
+        brand: '',
+        types: [],
+        tags: [],
+        imageUri: '',
+      });
+    }
   }
 
   Modes = Object.freeze({
@@ -214,14 +311,12 @@ class AddScreen extends React.Component {
         state = {tags: actives};
         break;
       default:
-        console.log('Unsupported mode');
         return;
     }
     this.setState(state);
   }
 
   showPicker = () => {
-    console.log("first");
     curThis = this;
     this.getCameraAsync()
     .then(curThis.getRollAsync().
@@ -231,11 +326,9 @@ class AddScreen extends React.Component {
   async pickImage() {
     let result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
-      aspect: [4, 3],
+      aspect: [1, 1],
       base64: true
     });
-
-    console.log(result);
 
     if(!result.cancelled) {
       this.setState({ imageUri : result.uri })
@@ -262,8 +355,38 @@ class AddScreen extends React.Component {
     }
   }
 
+  getExistingTags = () => {
+    tagList = []
+    Object.values(garments).forEach(function(item) {
+      item.tags.forEach(function(tag) {
+        if(!tagList.includes(tag)) {
+          tagList.push(tag);
+        }
+      });
+    });
+    return tagList;
+  }
+
+  getExistingTypes = () => {
+    typeList = []
+    Object.values(garments).forEach(function(item) {
+      item.types.forEach(function(type) {
+        if(!typeList.includes(type)) {
+          typeList.push(type);
+        }
+      });
+    });
+    return typeList;
+  }
+
+  navigateBack = () => {
+    this.props.navigation.goBack();
+  }
+
   render() {
     title = <Text style={styles.title}>Add Garment</Text>
+
+    editTitle = <Text style={styles.title}>Edit Garment</Text>
 
     photo = <View style={{ flex: 1, justifyContent: 'center' }}>
           <Icon
@@ -275,16 +398,32 @@ class AddScreen extends React.Component {
           </View>
 
     img = <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Image
-              style={{width: 120, height: 90}}
-              source={{uri: this.state.imageUri}}
-            />
+            <TouchableWithoutFeedback onPress={() => this.showPicker()}>
+              <Image
+                style={{width: 80, height: 80}}
+                source={{uri: this.state.imageUri}}
+              />
+            </TouchableWithoutFeedback>
           </View>
+
+    backIcon = <Icon name='arrow-back' color='#fff'
+                  onPress={() => this.navigateBack()} underlayColor='transparent' />
+
+    deleteButton = <Button
+            title={'Delete'}
+            onPress={this.deleteItem}
+          />
+
+    spacing = <View style={{width: 50, height: 0, backgroundColor: 'white'}} />
+
+    existingTags = this.getExistingTags();
+    existingTypes = this.getExistingTypes();
 
     return (
       <View style={{ flex: 1 }}>
         <Header
-          centerComponent={title}
+          leftComponent={this.state.id === null ? null : backIcon}
+          centerComponent={this.state.id === null ? title : editTitle}
         />
         { this.state.imageUri === '' ? photo : img }
         <View style={{ flex: 3, justifyContent: 'left' }}>
@@ -293,31 +432,35 @@ class AddScreen extends React.Component {
             editable={true}
             placeholder={'Garment Name'}
             onChangeText={(text) => this.setState({title: text})}
+            value={this.state.title}
           />
           <TextInput
             style={styles.textInput}
             editable={true}
             placeholder='Garment Brand'
             onChangeText={(text) => this.setState({brand: text})}
+            value={this.state.brand}
           />
           <SelectOrEnter
             mode={this.Modes.TYPE}
-            existings={['pants', 'shirts', 'jackets']}
+            existings={existingTypes}
             actives={this.state.types}
             alterParent={this.getChildState.bind(this)}
           />
           <SelectOrEnter
             mode={this.Modes.TAG}
-            existings={['formal', 'casual', 'denim']}
+            existings={existingTags}
             actives={this.state.tags}
             alterParent={this.getChildState.bind(this)}
           />
         </View>
-        <View>
+        <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
           <Button
-            title='Submit'
+            title={this.state.id === null ? 'Submit' : 'Save'}
             onPress={this.handleSubmit}
           />
+          {this.state.id === null ? null : spacing}
+          {this.state.id === null ? null : deleteButton}
         </View>
       </View>
     );

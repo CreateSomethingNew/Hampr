@@ -8,13 +8,14 @@ import { FlatGrid } from 'react-native-super-grid';
 import Menu, { MenuOptions,
          MenuOption, MenuTrigger } from 'react-native-popup-menu';
 import Modal from 'react-native-modal';
+import { ImagePicker, Permissions } from 'expo';
 
 class ClosetScreen extends React.Component {
 
   constructor(props) {
     super(props);
     this.state = { curTags: [], curType: 'All', dataSource: [], 
-                   refresh: false, modalVisible: false, outFitName: ""};
+                   refresh: false, modalVisible: false, outFitName: "", imageUri: ""};
   }
 
   componentDidMount() {
@@ -41,9 +42,15 @@ class ClosetScreen extends React.Component {
   willFocus = this.props.navigation.addListener(
     'willFocus',
     () => {
+      console.log(this.props.navigation)
       if(this.props.navigation.getParam('repoll', null) === null) {
       	const curTags = this.props.navigation.getParam('curTags', []);
     		const curType = this.props.navigation.getParam('curType', "All");
+        Object.values(garments).forEach(function(item) {
+          if(!('highlight' in item)) {
+            item.highlight = false;
+          }
+        })
     		this.setState({
         	curTags: curTags,
         	curType: curType,
@@ -51,12 +58,14 @@ class ClosetScreen extends React.Component {
         return;
       }
       else {
+        this.props.navigation.setParams({repoll: null});
+        this.props.navigation.setParams({curType: 'All', curTags: []});
         Object.values(garments).forEach(function(item) {
           item.highlight = false;
         })
         this.setState({
           curTags: [], curType: 'All', dataSource: garments, 
-          refresh: false, modalVisible: false, outFitName: "",
+          refresh: false, modalVisible: false, outFitName: "", imageUri: ""
         });
       }
     }
@@ -70,7 +79,9 @@ class ClosetScreen extends React.Component {
   }
 
 	GetSectionListItem = (navigate, item) => {
-      navigate('ClothingItem');
+      navigate('ClothingItem', {
+        item: item
+      });
   };
 
   switchHighLight = (item) => {
@@ -141,6 +152,7 @@ class ClosetScreen extends React.Component {
   RemoveTag = (tag, globalState) => {
     let newTags = globalState.curTags;
     newTags = newTags.filter(v => v !== tag);
+    this.props.navigation.setParams({curTags: newTags});
     this.setState({
       curTags: newTags,
       refresh: !globalState.refresh
@@ -156,10 +168,12 @@ class ClosetScreen extends React.Component {
   AddTag = (tag, globalState) => {
     let newTags = globalState.curTags;
     newTags.push(tag);
+    this.props.navigation.setParams({curTags: newTags});
     this.setState({
       curTags: newTags,
       refresh: !globalState.refresh
     })
+
   }
 
   InactiveTags = (globalState) => {
@@ -183,9 +197,11 @@ class ClosetScreen extends React.Component {
       return b[1] - a[1];
     });
 
+    let something = this;
+
     for (let i = 0; i < sortList.length; i++) {
       inactiveTagComponentList.push(<MenuOption
-        key={this.genUniqueID()} onSelect={() => this.AddTag(sortList[i][0], globalState)} children=
+        key={something.genUniqueID()} onSelect={() => this.AddTag(sortList[i][0], globalState)} children=
       <View>
         <Text>{sortList[i][0]}</Text>
         <Icon name='plus' type='entypo' color='#000000' underlayColor='transparent'
@@ -199,7 +215,7 @@ class ClosetScreen extends React.Component {
     tagComponentList = [];
     let something = this;
     globalState.curTags.forEach(function(name) {
-      tagComponentList.push(<MenuOption key={this.genUniqueID()} onSelect={() => something.RemoveTag(name, globalState)}
+      tagComponentList.push(<MenuOption key={something.genUniqueID()} onSelect={() => something.RemoveTag(name, globalState)}
        children=
       <View>
         <Text>{name}</Text>
@@ -366,6 +382,7 @@ class ClosetScreen extends React.Component {
   }
 
   ChangeFilter = (typeText) => {
+    this.props.navigation.setParams({curType: typeText});
     this.setState({
       curType: typeText,
       refresh: !this.state.refresh
@@ -413,19 +430,88 @@ class ClosetScreen extends React.Component {
   }
 
   saveOutfit = (navigate) => {
+    allKeys = Object.keys(outfits);
+    max = -1
+    allKeys.forEach(function(key) {
+      if(parseInt(key) > max) {
+        max = parseInt(key);
+      }
+    });
+    outfitObj = {};
+    outfitObj['name'] = this.state.outFitName;
+    outfitObj['dates'] = [];
+    outfitObj['id'] = max + 1;
+    if(this.state.imageUri === '') {
+      outfitObj['src'] = 'http://placehold.it/200x200';
+    }
+    else {
+      outfitObj['src'] = this.state.imageUri;
+    }
+    garmentsList = []
+    Object.values(this.state.dataSource).forEach(function(item) {
+      if(item.highlight === true) {
+        garmentsList.push(item.id);
+      }
+    });
+    outfitObj['garments'] = garmentsList;
+
+    outfits[max + 1] = outfitObj;
+    
     navigate('Clothing', { repoll: true });
+  }
+
+  showPicker = () => {
+    curThis = this;
+    this.getCameraAsync()
+    .then(curThis.getRollAsync().
+        then(curThis.pickImage()));
+  }
+
+  async pickImage() {
+    let result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      base64: true
+    });
+
+    if(!result.cancelled) {
+      this.setState({ imageUri : result.uri })
+    }
+  }
+
+  async getCameraAsync() {
+    const { Permissions } = Expo;
+    const { status, permissions } = await Permissions.askAsync(Permissions.CAMERA);
+    if (status === 'granted') {
+      return "grant";
+    } else {
+      return "not grant";
+    }
+  }
+
+  async getRollAsync() {
+    const { Permissions } = Expo;
+    const { status, permissions } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+    if (status === 'granted') {
+      return "grant";
+    } else {
+      return "not grant";
+    }
   }
 
   render() {
     const { navigate } = this.props.navigation;
     const { state } = this.props.navigation;
+
     const typeFilter = <View style={{  height: 40 }}>
                         <ScrollView style={{ backgroundColor: "#dcdcdc" }}
                       horizontal={true} >
                       { this.createScrollButtons() }
                       </ScrollView>
                       </View>;
+                      
     const numItemsHighlight = this.getNumHighlight(this.state.dataSource);
+
     const addToCart = <TouchableWithoutFeedback onPress={this.EnterOutfitScreen.bind(this)}>
                         <View style={{ height: 50, backgroundColor: 'green',
                                      justifyContent: 'center', alignItems: 'center' }}>
@@ -433,18 +519,30 @@ class ClosetScreen extends React.Component {
                         </View>
                       </TouchableWithoutFeedback>;
 
+    modalImage = <Icon name='image' underlayColor='transparent' size={120} 
+                onPress={() => this.showPicker()}/>
+
+    img = <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <TouchableWithoutFeedback onPress={() => this.showPicker()}>
+              <Image
+                style={{width: 120, height: 90}}
+                source={{uri: this.state.imageUri}}
+              />
+            </TouchableWithoutFeedback>
+          </View>
+
     return (
         <View style={styles.container}>
           { this.renderHeader(state, this.state) }
           { state.routeName === "Clothing" || state.routeName === "Select" ? typeFilter : null }
           <Modal isVisible={this.state.modalVisible} animationInTime={600}
-                 onBackdropPress={() => this.setState({modalVisible: false})}>
+                 onBackdropPress={() => this.setState({modalVisible: false, imageUri: ""})}>
             <View style={{ height: 270, backgroundColor: 'white', flexDirection: 'column',
                            alignItems: 'center' }}>
               <Text style={{ fontSize: 18, fontWeight: 'bold', paddingTop: 20 }}>
                 Add Image
               </Text>
-              <Icon name='image' underlayColor='transparent' size={120} />
+              { this.state.imageUri === '' ? modalImage : img }
               <Text style={{ fontSize: 18, fontWeight: 'bold', paddingTop: 0 }}>
                 Enter Name
               </Text>

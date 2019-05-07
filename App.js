@@ -7,13 +7,15 @@ import SettingsScreen from './components/Settings.js';
 import AddScreen from './components/Add.js';
 import ClosetScreen from './components/Closet.js';
 import WardrobeScreen from './components/Wardrobe.js';
-import ClothingItemScreen from './components/ClothingItem.js';
 import OutfitScreen from './components/Outfit.js';
 import CalendarScreen from './components/Calendar.js';
 import DayScreen from './components/Day.js';
 import SplashScreen from './components/Splash.js';
+import LoadingScreen from './components/Loading.js';
 import { MenuProvider } from 'react-native-popup-menu';
 import GetData from './Api.js';
+
+global.serverUrl = "192.168.1.14";
 
 const WardrobeStack = createStackNavigator(
     {
@@ -41,7 +43,7 @@ const ClothingStack = createStackNavigator(
     	screen: ClosetScreen
     },
     ClothingItem: {
-    	screen: ClothingItemScreen
+    	screen: AddScreen
     },
     Outfit: {
     	screen: ClosetScreen
@@ -105,18 +107,29 @@ const AppContainer = createAppContainer(TabNav);
 export default class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { ready: false };
+    this.state = { ready: false, loggedIn: false };
   }
 
-  componentDidMount() {
+  logIn() {
+    this.setState({loggedIn : true});
     GetData()
       .then(() => {
         this.setState({ ready: true });
+      })
+      .catch(() => {
+          console.log("unable to get data");
       });
   }
 
+  componentDidMount() {
+  }
+
+  renderLoading() {
+    return <LoadingScreen/>;
+  }
+
   renderSplash() {
-    return <SplashScreen/>;
+    return <SplashScreen logIn = {this.logIn.bind(this)}/>;
   }
 
   renderApp() {
@@ -128,6 +141,6 @@ export default class App extends React.Component {
   }
 
   render() {
-    return this.state.ready ? this.renderApp() : this.renderSplash();
+    return this.state.ready ? this.renderApp() : (this.state.loggedIn ? this.renderLoading() : this.renderSplash());
   }
 }

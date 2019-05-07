@@ -13,6 +13,13 @@ class WardrobeScreen extends React.Component {
     console.log('Wardrobe - did mount');
   }
 
+  willFocus = this.props.navigation.addListener(
+    'willFocus',
+    () => {
+            this.forceUpdate();
+          }
+  );
+
   renderGridTile(outfit) {
     let navigation = this.props.navigation;
     let childProps = { outfit };
