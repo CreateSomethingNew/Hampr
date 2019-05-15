@@ -15,7 +15,7 @@ import LoadingScreen from './components/Loading.js';
 import { MenuProvider } from 'react-native-popup-menu';
 import GetData from './Api.js';
 
-global.serverUrl = "192.168.1.14";
+global.serverUrl = "192.168.1.18";
 
 const WardrobeStack = createStackNavigator(
     {

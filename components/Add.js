@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, FlatList, Form, Image, Picker, ScrollView, StyleSheet, Text, TextInput, 
+import { Button, FlatList, Form, Image, Picker, ScrollView, StyleSheet, Text, TextInput,
   TouchableWithoutFeedback, View } from 'react-native';
 import { Header, Icon, ListItem } from 'react-native-elements';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -49,7 +49,7 @@ class SelectOrEnter extends React.Component {
       actives: props.actives,
       inactives: this.getInactives(props.existings, props.actives),
       existings: this.props.existings,
-    });  
+    });
   }
 
   getInactives = (existings, actives) => {
@@ -191,7 +191,7 @@ class AddScreen extends React.Component {
       types: types,
       tags: tags,
       imageUri: imageUri,
-      id: -1,
+      id: null,
     };
   }
 
@@ -223,18 +223,48 @@ class AddScreen extends React.Component {
   );
 
   deleteItem = () => {
-    //back end call
-
-    delete garments[this.state.id];
-
-    let something = this;
-
-    Object.values(outfits).forEach(function(outfit) {
-      outfit.garments = outfit.garments.filter(v => v !== something.state.id);
+    let outfitIds = [];
+    Object.values(global.outfits).forEach(outfit => {
+      if (outfit.garments.includes(this.state.id)) {
+        outfitIds.push(outfit.id);
+      }
     });
-    
-    this.props.navigation.navigate('Clothing', { repoll: true });
-    //this.props.navigation.state.params.refresh(); 
+
+    retrieveAuthData()
+      .then(cookies => {
+        fetch('http://' + global.serverUrl + ':8080/api/garment/delete', {
+          method: 'DELETE',
+          headers: {
+            "authId": cookies[0],
+            "token": cookies[1],
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            "garmentId": this.state.id,
+            "outfitIds": outfitIds
+          })
+        })
+          .then(response => response.json())
+          .then(json => {
+            console.log(json);
+            delete global.garments[this.state.id];
+            outfitIds.forEach(outfitId => {
+              let outfit = global.outfits[outfitId]
+              outfit.garments = outfit.garments.filter(v => v !== this.state.id);
+            });
+            this.props.navigation.navigate('Clothing', { repoll: true });
+          })
+          .catch(error => {
+            console.log("unable to hit delete garment endpoint:", error);
+          });
+      })
+      .catch(error => {
+        console.log("unable to retrieve cookies:", error);
+      });
+
+
+    //this.props.navigation.state.params.refresh();
     //this.props.navigation.goBack();
   }
 

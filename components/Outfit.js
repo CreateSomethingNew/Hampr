@@ -3,6 +3,7 @@ import { Text, View, StyleSheet, TouchableWithoutFeedback, Image } from 'react-n
 import { FlatGrid } from 'react-native-super-grid';
 import { Header, Icon } from 'react-native-elements';
 import Menu, { MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
+import { retrieveAuthData } from '../Util.js'
 
 class OutfitScreen extends React.Component {
 
@@ -14,6 +15,8 @@ class OutfitScreen extends React.Component {
     this.state.outfitGarments = this.state.outfit.garments
       .map(garmentId => global.garments[garmentId]);
   }
+
+
 
   renderGridTile(garment) {
     return (
@@ -38,7 +41,7 @@ class OutfitScreen extends React.Component {
           customStyles={{optionsContainer: styles.menuOptions}}>
             <MenuOption
               onSelect={()=>{}}
-              children=<Text style={styles.menuText}>Option</Text>
+              children=<Text style={styles.menuText}>Delete</Text>
             />
         </MenuOptions>
         <Text style={styles.gridText}>{garment.name}</Text>
