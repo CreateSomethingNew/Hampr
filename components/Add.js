@@ -269,6 +269,13 @@ class AddScreen extends React.Component {
   }
 
   handleSubmit = () => {
+    var dateObj = new Date();
+    var month = dateObj.getUTCMonth() + 1;
+    var day = dateObj.getUTCDate();
+    var year = dateObj.getUTCFullYear();
+
+    var newDate = year + "/" + month + "/" + day;
+
     if(this.state.id !== null) {
       garmentObj = {};
       garmentObj['name'] = this.state.title;
@@ -277,6 +284,8 @@ class AddScreen extends React.Component {
       garmentObj['tags'] = this.state.tags;
       garmentObj['id'] = this.state.id;
       garmentObj['src'] = this.state.imageUri;
+      garmentObj['date'] = newDate;
+
 
        retrieveAuthData()
       .then(cookies => {
@@ -318,6 +327,7 @@ class AddScreen extends React.Component {
       garmentObj['brand'] = this.state.brand;
       garmentObj['types'] = this.state.types;
       garmentObj['tags'] = this.state.tags;
+      garmentObj['date'] = newDate;
       garmentObj['id'] = (max + 1).toString();
       if(this.state.imageUri === '') {
         garmentObj['src'] = 'http://placehold.it/200x200';
