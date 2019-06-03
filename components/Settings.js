@@ -31,7 +31,7 @@ class SettingsScreen extends React.Component {
         pwVis: true
       });
     }
-    else if(item === "Delete All Data") {
+    else if(item === "Log Out") {
       this.setState({
         dataVis: true
       });
@@ -87,9 +87,14 @@ class SettingsScreen extends React.Component {
   }
 
   deleteData = () => {
-    this.setState({
+    deleteAuthData().then(() => {
+      this.setState({
         dataVis: false
       });
+      global.restartLogin();
+    }).catch(() => {
+      throw new Error();
+    })
   }
 
   deleteAccount = () => {
@@ -142,7 +147,7 @@ class SettingsScreen extends React.Component {
             <View style={{ height: 100, backgroundColor: 'white', flexDirection: 'column',
                            alignItems: 'center' }}>
               <Text style={{ fontSize: 18, fontWeight: 'bold', paddingTop: 20, paddingBottom: 10}}>
-                Do you want to delete all data?
+                Do you want to log out?
               </Text>
               <View style={{ flexDirection: 'row'}}>
                 <Button
@@ -185,7 +190,7 @@ class SettingsScreen extends React.Component {
           </Modal>
          <SectionList
 		       sections={[
-		         { title: 'Data Settings', data: ['Delete All Data', 'Delete Account']}
+		         { title: 'User Settings', data: ['Log Out', 'Delete Account']}
 		       ]}
 		       renderSectionHeader={ ({section}) => 
 		       	<Text style={styles.SectionHeader}> { section.title } </Text> }
