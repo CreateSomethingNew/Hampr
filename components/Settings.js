@@ -3,6 +3,7 @@ import { Text, View, StyleSheet, SectionList,
 				 TouchableWithoutFeedback, TextInput, Button } from 'react-native';
 import { Header, Icon } from 'react-native-elements';
 import Modal from 'react-native-modal';
+import { deleteAuthData, retrieveAuthData } from '../Util.js'
 
 class SettingsScreen extends React.Component {
 
@@ -92,8 +93,34 @@ class SettingsScreen extends React.Component {
   }
 
   deleteAccount = () => {
-    this.setState({
-        accountVis: false
+    retrieveAuthData()
+      .then(cookies => {
+        fetch('http://' + global.serverUrl + ':8080/api/user/delete', {
+          method: 'PUT',
+          headers: {
+            "authId": cookies[0],
+            "token": cookies[1],
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+        })
+          .then(response => response.json())
+          .then(json => {
+            deleteAuthData().then(() => {
+              this.setState({
+                accountVis: false
+              });
+              global.restartLogin();
+            }).catch(() => {
+              throw new Error();
+            })
+          })
+          .catch(error => {
+            console.log("unable to hit delete account endpoint:", error);
+          });
+      })
+      .catch(error => {
+        console.log("unable to retrieve cookies:", error);
       });
   }
 

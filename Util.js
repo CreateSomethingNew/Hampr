@@ -12,4 +12,12 @@ export function retrieveAuthData() {
 	});
 }
 
+export function deleteAuthData() {
+	return AsyncStorage.multiRemove(['authId', 'token']).then(function(res) {
+		return null;
+	}).catch(function() {
+		throw new Error();
+	});
+}
+
  

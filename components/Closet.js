@@ -9,6 +9,7 @@ import Menu, { MenuOptions,
          MenuOption, MenuTrigger } from 'react-native-popup-menu';
 import Modal from 'react-native-modal';
 import { ImagePicker, Permissions } from 'expo';
+import { retrieveAuthData } from '../Util.js'
 
 class ClosetScreen extends React.Component {
 
@@ -454,9 +455,32 @@ class ClosetScreen extends React.Component {
     });
     outfitObj['garments'] = garmentsList;
 
-    outfits[(max + 1).toString()] = outfitObj;
     
-    navigate('Clothing', { repoll: true });
+
+    retrieveAuthData()
+      .then(cookies => {
+        fetch('http://' + global.serverUrl + ':8080/api/outfit/insert', {
+          method: 'POST',
+          headers: {
+            "authId": cookies[0],
+            "token": cookies[1],
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(outfitObj)
+        })
+          .then(response => response.json())
+          .then(json => {
+            outfits[(max + 1).toString()] = outfitObj;
+            navigate('Clothing', { repoll: true });
+          })
+          .catch(error => {
+            console.log("unable to hit insert outfit endpoint:", error);
+          });
+      })
+      .catch(error => {
+        console.log("unable to retrieve cookies:", error);
+      });
   }
 
   showPicker = () => {

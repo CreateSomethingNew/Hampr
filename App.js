@@ -15,7 +15,7 @@ import LoadingScreen from './components/Loading.js';
 import { MenuProvider } from 'react-native-popup-menu';
 import GetData from './Api.js';
 
-global.serverUrl = "192.168.1.18";
+global.serverUrl = "192.168.1.14";
 
 const WardrobeStack = createStackNavigator(
     {
@@ -121,7 +121,15 @@ export default class App extends React.Component {
       });
   }
 
+  restartLogin() {
+    this.setState({
+      loggedIn: false,
+      ready: false
+    });
+  }
+
   componentDidMount() {
+    global.restartLogin = this.restartLogin.bind(this);
   }
 
   renderLoading() {
