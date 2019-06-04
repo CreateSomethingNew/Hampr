@@ -4,6 +4,7 @@ import { Header, Icon } from 'react-native-elements';
 import { FlatGrid } from 'react-native-super-grid';
 import Menu, { MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
 import Modal from 'react-native-modal';
+import { retrieveAuthData } from '../Util.js';
 
 class DayScreen extends React.Component {
 
@@ -27,20 +28,75 @@ class DayScreen extends React.Component {
   }
 
   unscheduleOutfit(outfit, index) {
-    outfit.dates = outfit.dates.filter(date => date != this.state.date);
-    this.state.dayOutfits.splice(index, 1);
-    this.state.markDates();
-    this.refresh();
+    let outfitCopy = JSON.parse(JSON.stringify(outfit));
+    outfitCopy.dates = outfitCopy.dates
+      .filter(date => date != this.state.date);
+    retrieveAuthData()
+      .then(cookies => {
+        let url = 'http://' + global.serverUrl + ':8080/api/outfit/insert';
+        fetch(url, {
+          method: 'POST',
+          headers: {
+            "authId": cookies[0],
+            "token": cookies[1],
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(outfitCopy)
+        })
+          .then(response => response.json())
+          .then(json => {
+            outfit.dates = outfit.dates
+              .filter(date => date != this.state.date);
+            this.state.dayOutfits.splice(index, 1);
+            this.state.markDates();
+            this.refresh();
+          })
+          .catch(error => {
+            console.log("unable to hit insert outfit endpoint:", error);
+          });
+      })
+      .catch(error => {
+        console.log("unable to retrieve cookies:", error);
+      });
   }
 
   scheduleOutfit(outfit) {
+    let outfitCopy = JSON.parse(JSON.stringify(outfit));
     let date = this.state.date;
-    if (!outfit.dates.includes(date)) {
-      outfit.dates.push(date);
-      this.state.dayOutfits.push(outfit);
-      this.state.markDates();
+    if (!outfitCopy.dates.includes(date)) {
+      outfitCopy.dates.push(date);
     }
-    this.setState({ schedulingOutfit: false });
+    retrieveAuthData()
+      .then(cookies => {
+        let url = 'http://' + global.serverUrl + ':8080/api/outfit/insert';
+        fetch(url, {
+          method: 'POST',
+          headers: {
+            "authId": cookies[0],
+            "token": cookies[1],
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(outfitCopy)
+        })
+          .then(response => response.json())
+          .then(json => {
+
+            if (!outfit.dates.includes(date)) {
+              outfit.dates.push(date);
+              this.state.dayOutfits.push(outfit);
+              this.state.markDates();
+            }
+            this.setState({ schedulingOutfit: false });
+          })
+          .catch(error => {
+            console.log("unable to hit insert outfit endpoint:", error);
+          });
+      })
+      .catch(error => {
+        console.log("unable to retrieve cookies:", error);
+      });
   }
 
   renderGridTile(outfit, index) {
@@ -193,10 +249,11 @@ const styles = StyleSheet.create({
     right: 7,
   },
   menuOptions: {
-    maxWidth: 105
+    maxWidth: 130,
+    height: 36
   },
   menuText: {
-
+    fontSize: 25
   },
   modal: {
     height: 500,

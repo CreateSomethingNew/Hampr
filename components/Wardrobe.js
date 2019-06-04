@@ -3,6 +3,7 @@ import { Text, View, Button, TouchableWithoutFeedback, StyleSheet, Alert, FlatLi
 import { Header, Icon } from 'react-native-elements';
 import { FlatGrid } from 'react-native-super-grid';
 import Menu, { MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
+import { retrieveAuthData } from '../Util.js';
 
 class WardrobeScreen extends React.Component {
   constructor(props) {
@@ -19,6 +20,34 @@ class WardrobeScreen extends React.Component {
             this.forceUpdate();
           }
   );
+
+  deleteOutfit(outfitId) {
+    retrieveAuthData()
+      .then(cookies => {
+        let url = 'http://' + global.serverUrl + ':8080/api/outfit/delete';
+        fetch(url, {
+          method: 'DELETE',
+          headers: {
+            "authId": cookies[0],
+            "token": cookies[1],
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(outfitId)
+        })
+          .then(response => response.json())
+          .then(json => {
+            delete global.outfits[outfitId];
+            this.forceUpdate();
+          })
+          .catch(error => {
+            console.log("unable to hit delete outfit endpoint:", error);
+          });
+      })
+      .catch(error => {
+        console.log("unable to retrieve cookies:", error);
+      });
+  }
 
   renderGridTile(outfit) {
     let navigation = this.props.navigation;
@@ -48,6 +77,10 @@ class WardrobeScreen extends React.Component {
             <MenuOption
               onSelect={() => navigation.push('Calendar', childProps)}
               children=<Text style={styles.menuText}>Schedule</Text>
+            />
+            <MenuOption
+              onSelect={this.deleteOutfit.bind(this, outfit.id)}
+              children=<Text style={styles.menuText}>Delete</Text>
             />
         </MenuOptions>
         <Text style={styles.gridText}>{outfit.name}</Text>
@@ -122,11 +155,12 @@ const styles = StyleSheet.create({
     right: 7,
   },
   menuOptions: {
-    maxWidth: 105
+    maxWidth: 130,
+    height: 72
   },
   menuText: {
-
-  }
+    fontSize: 25
+  },
 });
 
 export default WardrobeScreen;

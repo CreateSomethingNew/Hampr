@@ -22,30 +22,12 @@ class OutfitScreen extends React.Component {
     return (
       <View style={styles.gridTile}>
       <TouchableWithoutFeedback onPress={() => {}}>
-      <Menu>
+      <View>
         <Image
           style={styles.gridThumbnail}
           source={{ uri: garment.src }} />
-        <MenuTrigger
-          children=
-            <Icon
-              name='ios-more'
-              type='ionicon'
-              color='black' />
-          customStyles={{
-            triggerOuterWrapper: styles.moreButton,
-            triggerTouchable: { underlayColor: 'transparent'}
-          }}
-        />
-        <MenuOptions
-          customStyles={{optionsContainer: styles.menuOptions}}>
-            <MenuOption
-              onSelect={()=>{}}
-              children=<Text style={styles.menuText}>Delete</Text>
-            />
-        </MenuOptions>
         <Text style={styles.gridText}>{garment.name}</Text>
-      </Menu>
+      </View>
       </TouchableWithoutFeedback>
       </View>
     );
@@ -128,11 +110,12 @@ const styles = StyleSheet.create({
     right: 7,
   },
   menuOptions: {
-    maxWidth: 105
+    maxWidth: 130,
+    height: 72
   },
   menuText: {
-
-  }
+    fontSize: 25
+  },
 });
 
 export default OutfitScreen;

@@ -4,6 +4,7 @@ import { Header, Icon } from 'react-native-elements';
 import { CalendarList } from 'react-native-calendars';
 import { FlatGrid } from 'react-native-super-grid';
 import Modal from 'react-native-modal';
+import { retrieveAuthData } from '../Util.js';
 
 class CalendarScreen extends React.Component {
 
@@ -52,13 +53,36 @@ class CalendarScreen extends React.Component {
   }
 
   handleSavePress() {
-    let id = this.state.outfit.id;
+    let outfit = JSON.parse(JSON.stringify(this.state.outfit));
     let date = this.state.selectedDate;
-    let dates = global.outfits[id].dates;
-    if (!dates.includes(date)) {
-      global.outfits[id].dates.push(date);
+    if (!outfit.dates.includes(date)) {
+      outfit.dates.push(date);
     }
-    this.props.navigation.goBack();
+    retrieveAuthData()
+      .then(cookies => {
+        let url = 'http://' + global.serverUrl + ':8080/api/outfit/insert';
+        fetch(url, {
+          method: 'POST',
+          headers: {
+            "authId": cookies[0],
+            "token": cookies[1],
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(outfit)
+        })
+          .then(response => response.json())
+          .then(json => {
+            global.outfits[outfit.id] = outfit;
+            this.props.navigation.goBack();
+          })
+          .catch(error => {
+            console.log("unable to hit insert outfit endpoint:", error);
+          });
+      })
+      .catch(error => {
+        console.log("unable to retrieve cookies:", error);
+      });
   }
 
   navigateToDay(day) {
